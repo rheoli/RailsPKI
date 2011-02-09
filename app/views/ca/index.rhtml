@@ -1,11 +1,16 @@
 <p>
  Please choose:
  <ul>
-  <li><%= link_to("View Requests for Sign", :action => "sign") %></li>
+  <li><%= link_to("View Requests for Sign", :action => "sign_approved") %></li>
   <li><%= link_to("View Signed Certificates", :action => "cert_view") %></li>
-  <li><%= link_to("View CAs", :action => "ca_def_list") %></li>
-  <li><%= link_to("Add new CA", :action => "ca_def_add") %></li>
+  <li><%= link_to("View CAs", :action => "ca_domain_list") %></li>
+  <li><%= link_to("Add new CA", :action => "ca_domain_add") %></li>
   <li><%= link_to("Get New Requests from RAs", :action => "request_get") %></li>
   <li><%= link_to("Put signed Requests to RAs", :action => "request_put") %></li>
  </ul>
+ <!-- ><table border="1" cellpadding="0" cellspacing="0">
+  <% request.env.each do |key,val| -%>
+   <tr><td><%= key %></td><td><%= val %></td></tr>
+  <% end -%>
+ </table> -->
 </p>

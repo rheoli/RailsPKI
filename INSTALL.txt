@@ -1,18 +1,32 @@
 ========================
- RailsPKI Version 0.0.1
+ RailsPKI Version Trunk
 ========================
  
 Requiremens:
  - Ruby 1.8.4 (with OpenSSL Extension)
- - SQLite >= 3.2.8
+ - SQLite >= 3.2.8 (only tested with 3.3.5)
  - sqlite3-ruby 1.1.0
- - Ruby on Rails >= 1.0.0 (tested with 1.1.2)
+ - Ruby on Rails >= 1.1.6 (only tested with 1.1.6)
  
-Installation:
+Installation (of a CA instance):
  - Unpack Package somewhere
  - change directory to somewhere/RailsPKI
- - call rake migrate
- - call script/server
- - now you can call RailsPKI on http://localhost/ca
- - login (any username/password works)
+ - call 'rake migrate'
+ - call 'rake railspki:init_ca'
+ - call 'rake railspki:create_ca_server_cert'
+ - call 'rake railspki:create_ca_user'
+ - call 'script/server webrick-ssl'  -> password 'test'
+ - load the client cert from config/ssl/user/{username}.p12 in your browser
+   trust the new root certificate in the browser
+ - now you can call RailsPKI on https://localhost:3443/ca
+ - chose the role
  
+Installation (of a RA instance):
+ - make sure there is already a CA instance installed
+ - Unpack Package somewhere2
+ - change directory to somewhere2/RailsPKI
+ - call 'rake migrate'
+ - call 'rake railspki:init_ra'
+ - ???
+ - now you can call RailsPKI on https://localhost:3443/ra
+ - chose the role

@@ -1,0 +1,22 @@
+<h2>View CA '<%= @ca_domain.name %>'</h2>
+<table border="1">
+	<% if @ca_domain.pubkey != nil -%>
+	<tr>
+		<td valign="top">Subject DN</td>
+		<td><%= @ca_domain.pubkey.subject.to_s  %></td>
+	</tr>
+	<tr>
+		<td valign="top">Issuer DN</td>
+		<td><%= @ca_domain.pubkey.issuer.to_s  %></td>
+	</tr>
+	<% end -%>
+	<tr>
+		<td valign="top">PEM</td>
+		<td><pre><%= @ca_domain.pubkey_pem %></pre></td>
+	</tr>
+</table>
+<p>
+<%= start_form_tag :action => 'ca_domain_delete', :id => @ca_domain.id %>
+<%= submit_tag "Delete" %></p>
+<%= end_form_tag %>
+</p>

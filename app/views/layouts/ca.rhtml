@@ -18,8 +18,13 @@
 
 <div id="navigation">
 <ul>
-<% if session[:user_id] -%>
-<li class="selected"><%= link_to("Home", :controller => "ca") %></li>
+<% if session[:user] -%>
+<li class="selected"><%= link_to("Home", :controller=>'ca', :action=>'index') %></li>
+<li>&nbsp;</li>
+<li><%= link_to("Switch to RA", :controller=>'ra', :action=>'index') %></li>
+<li><%= link_to("Change role", :controller=>'auth', :action=>'change_role') %></li>
+<li>&nbsp;</li>
+<li><%= link_to("Logout", :controller=>'auth', :action=>'logout') %></li>
 <% else -%>
 <li class="selected">&nbsp;Login&nbsp;</li>
 <% end -%>

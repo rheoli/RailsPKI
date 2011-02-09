@@ -22,7 +22,7 @@
 #++
 
 class RaServer < ActiveRecord::Base
-
+  has_and_belongs_to_many :ca_domains
+  
   validates_presence_of :name
-
 end

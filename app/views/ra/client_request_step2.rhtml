@@ -5,12 +5,12 @@
 <%= start_form_tag :action => 'client_request' %>
 
 <table border="0">
- <% @ra_item.ca_definition.dn_policy["sort_as_sign"].each do |c| %>
+ <% @ra_item.ca_domain.dn_sort_for_sign.each do |c| %>
  <tr>
   <td align="left"><%= c %></td>
   <td align="left">
-   <% if @ra_item.ca_definition.dn_policy["dn_info"][c][0][0]=="match" -%>
-    <%= @ra_item.ca_definition.dn[c] %>
+   <% if @ra_item.ca_domain.dn_policy["dn_info"][c][0][0]=="match" -%>
+    <%= @ra_item.ca_domain.dn[c] %>
    <% else -%>
     <%= text_field("ra_item", "subject_#{c}", "size"=>"40") %>
    <% end -%>

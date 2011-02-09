@@ -5,12 +5,12 @@
 <%= start_form_tag :action => 'genreq' %>
 
 <TABLE BORDER="0">
- <% @ca_def.dn_policy["sort_as"].each do |c| %>
+ <% @ca_domain.dn_sort_for_sign.each do |c| %>
  <TR>
   <TD ALIGN="LEFT"><%= c %></TD>
   <TD ALIGN="LEFT">
-   <% if @ca_def.dn_policy["dn_info"][c][0][0]=="match" -%>
-    <%= @ca_def.dn[c] %>
+   <% if @ca_domain.dn_policy["dn_info"][c][0][0]=="match" -%>
+    <%= @ca_domain.dn[c] %>
    <% else -%>
     <%= text_field("ra_req", c, "size"=>"40") %>
    <% end -%>

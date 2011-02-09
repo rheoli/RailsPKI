@@ -22,10 +22,20 @@
 #++
 
 class RaController < ApplicationController
-
   layout "ra"
+  
+  before_filter :authorize_ra
 
-  before_filter :authorize
+  protected
+
+   def authorize_ra
+     return if !authorize
+     redirect_to_access_denied("no role defined") and return if current_role.nil?
+     return if current_role.name==Role::ROLE_CA_ADMIN
+     redirect_to_access_denied("not enough privileges")
+   end
+
+  public
 
   def server_request
     _certificate_request("server_request")
@@ -33,56 +43,6 @@ class RaController < ApplicationController
 
   def client_request
     _certificate_request("client_request")
-  end
-
-  def _certificate_request(_type)
-    @ca_defs_all=CaDefinition.find_all
-    if request.get?
-      @ra_item=RaItem.find(params[:id]) if params[:id]!=nil
-      if @ra_item==nil
-        #-Step 1 Request
-        @ra_item    =RaItem.new
-        if params[:browser]!="ie" and params[:browser]!="moz"
-          render(:template=>"ra/#{_type}_step1.rhtml")
-        else
-          if params[:browser]=="ie"
-            @body_on_load="FindProviders()"
-          end
-          render(:template=>"ra/#{_type}_step1_#{params[:browser]}.rhtml")
-        end
-      else
-        #-Step 2 Request
-        render(:template=>"ra/#{_type}_step2.rhtml")
-      end
-    else
-      #-Step 1 Response
-      if params[:id]==nil
-        @ra_item        =RaItem.new(params[:ra_item])
-        if params[:csr]!=nil
-          @ra_item.csr="-----BEGIN CERTIFICATE REQUEST-----\n"
-          @ra_item.csr<<params[:csr].gsub(/\\r/, '').gsub(/\\n/,'\n')
-          @ra_item.csr<<"-----END CERTIFICATE REQUEST-----\n"
-          p @ra_item.csr
-        end
-        @ra_item.state  =RaItem::STATE_REQUEST
-        @ra_item.user_id=session[:user_id]
-        if @ra_item.save
-          redirect_to :action => _type, :id => @ra_item.id
-          return
-        end
-        render(:template=>"ra/#{_type}_step1.rhtml")
-      else
-        @ra_item=RaItem.find(params[:id])
-        params[:ra_item].each do |k, v|
-          if k =~ /^subject_([A-Za-z]+)$/
-            @ra_item.dn[$1]=v if @ra_item.dn.has_key?($1) and @ra_item.ca_definition.dn_policy["dn_info"][$1][0][0]!="match"
-          end
-        end
-        @ra_item.state=RaItem::STATE_READY_TO_SIGN
-        @ra_item.save
-        redirect_to :action => 'cert_view', :id => params[:id]
-      end
-    end 
   end
 
   def cert_view
@@ -102,6 +62,30 @@ class RaController < ApplicationController
     end
   end
 
+  def cert_revoke
+    if params[:id].nil? then
+      redirect_to :action => 'cert_view'
+      return
+    end 
+    @ra_item=RaItem.find(params[:id])
+    if @ra_item==nil
+      redirect_to :action => 'cert_view', :id => nil
+      return
+    end
+    if @ra_item.crt_pem.nil?
+      redirect_to :action => 'cert_view', :id => nil
+      return
+    end
+    if request.post?
+      r=RaRevoke.new
+      r.ra_item_id=@ra_item.id
+      r.reason=params[:reason]
+      r.save
+      redirect_to :action => 'cert_view', :id => nil
+      return
+    end
+  end
+
   def index
   end
 
@@ -111,8 +95,8 @@ class RaController < ApplicationController
       return
     end
     if params[:id]!=nil then
-      @ca_def=CaDefinition.find(params[:id])
-      if @ca_def==nil
+      @ca_domain=CaDomain.find(params[:id])
+      if @ca_domain==nil
         redirect_to :action => 'genreq', :id => nil
         return
       end
@@ -128,9 +112,80 @@ class RaController < ApplicationController
       end
     else
       @ra_req = RaReqgen.new
-      @ca_defs_all=CaDefinition.find_all
+      @ca_domains=CaDomain.find_all
       render(:template=>"ra/genreq_step1.rhtml")
     end
+  end
+  
+  def sign
+    if params[:id]!=nil
+      @ra_item=RaItem.find(params[:id])
+      if @ra_item==nil
+        redirect_to :action => 'sign', :id => nil
+        return
+      end
+      if request.post?
+        if @ra_item.approve_for_sign
+          redirect_to :action => 'cert_view', :id => params[:id]
+        end
+      else
+        render(:template=>"ra/sign_item.rhtml")
+      end
+    else
+      @ra_items=RaItem.find_all_by_state(RaItem::STATE_READY_TO_SIGN)
+    end
+  end
+  
+ private
+  
+  def _certificate_request(_type)
+    @ca_domains=CaDomain.find_all
+    if request.get?
+      @ra_item=RaItem.find(params[:id]) if params[:id]!=nil
+      if @ra_item==nil
+        #-Step 1 Request
+        @ra_item    =RaItem.new
+        if params[:browser]!="ie" and params[:browser]!="moz"
+          render(:template=>"ra/#{_type}_step1.rhtml")
+        else
+          if params[:browser]=="ie"
+            @body_on_load="FindProviders()"
+          end
+          render(:template=>"ra/#{_type}_step1_#{params[:browser]}.rhtml")
+        end
+      else
+        #-Step 2 Request
+        p @ra_item
+        render(:template=>"ra/#{_type}_step2.rhtml")
+      end
+    else
+      #-Step 1 Response
+      if params[:id]==nil
+        @ra_item        =RaItem.new(params[:ra_item])
+        if params[:csr]!=nil
+          @ra_item.csr="-----BEGIN CERTIFICATE REQUEST-----\n"
+          @ra_item.csr<<params[:csr].gsub(/\\r/, '').gsub(/\\n/,'\n')
+          @ra_item.csr<<"-----END CERTIFICATE REQUEST-----\n"
+          p @ra_item.csr
+        end
+        @ra_item.user_id=session[:user]
+        if @ra_item.save
+          redirect_to :action => _type, :id => @ra_item.id
+          return
+        end
+        render(:template=>"ra/#{_type}_step1.rhtml")
+      else
+        @ra_item=RaItem.find(params[:id])
+        params[:ra_item].each do |k, v|
+          if k =~ /^subject_([A-Za-z]+)$/
+            @ra_item.dn[$1]=v if @ra_item.dn.has_key?($1) and @ra_item.ca_domain.dn_policy["dn_info"][$1][0][0]!="match"
+          end
+        end
+        @ra_item.state=RaItem::STATE_READY_TO_SIGN
+        @ra_item.save
+        redirect_to :action => 'cert_view', :id => params[:id]
+      end
+    end 
   end
 
 end

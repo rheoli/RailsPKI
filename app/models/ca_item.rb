@@ -24,13 +24,15 @@
 require 'openssl'
 
 class CaItem < ActiveRecord::Base
-  belongs_to :ca_definition
+  
+  belongs_to :ca_domain
 
   serialize :dn
 
-  validates_presence_of :csr, :ca_definition_id
+  validates_presence_of :csr, :ca_domain_id, :state
 
   STATE_READY_TO_SIGN="ready_to_sign"
+  STATE_SIGN_APPROVED="sign_approved"
   STATE_SIGNED       ="signed"
   STATE_RA_SYNCED    ="ra_synced"
 
@@ -41,12 +43,42 @@ class CaItem < ActiveRecord::Base
     ca_item=CaItem.new
     ca_item.dn=_ra_item.dn
     ca_item.csr=_ra_item.csr
-    ca_item.state=CaItem::STATE_READY_TO_SIGN
-    ca_item.ca_definition_id=_ra_item.ca_definition_id
+    ca_item.state=_ra_item.state
+    ca_item.ca_domain_id=_ra_item.ca_domain_id
     ca_item.ra_item_id=_ra_item.id
-    ca_item.ra_server_id=_ra_server_id
+    ca_item.ra_server_id=_ra_server_id 
     return(nil) if !ca_item.save
     return(ca_item)
   end
+  
+  def sign_and_save
+    s_csr=nil
+    begin
+      s_csr=OpenSSL::X509::Request.new(csr)
+    rescue
+      s_csr=nil
+    end
+    if s_csr==nil
+      spki_csr=csr
+      spki_csr.gsub!(/\n/, '')
+      spki_csr.gsub!(/\r/, '')
+      begin
+        s_csr=OpenSSL::Netscape::SPKI.new(spki_csr)
+      rescue
+        s_csr=nil
+      end
+      if s_csr==nil
+        raise "Can't identify request certificate"
+      end
+    end  
+    s_cert=ca_domain.sign(s_csr, nil, dn)
+    self.crt_pem   =s_cert.to_pem
+    self.crt_serial=s_cert.serial.to_i
+    self.crt_begin =s_cert.not_before
+    self.crt_end   =s_cert.not_after
+    self.state     =CaItem::STATE_SIGNED
+    return(self.save)
+  end
+  
 end
 

@@ -132,10 +132,10 @@
       <td align="left">
        <%=
         options = [["Select one", ""]]
-        @ca_defs_all.each do |c|
+        @ca_domains.each do |c|
           options << [c.name, c.id]
         end
-        select("ra_item", "ca_definition_id", options)
+        select("ra_item", "ca_domain_id", options)
        %>
       </td>
      </tr>

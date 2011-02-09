@@ -1,0 +1,52 @@
+<h2>Create CA</h2>
+
+<% if !@page_two -%>
+<%= error_messages_for("ca_domain") %>
+
+<%= start_form_tag({:action => 'ca_domain_add'}, :multipart => true)  %>
+
+<TABLE BORDER="0">
+ <TR>
+  <TD ALIGN="LEFT">Create CA from</TD>
+  <TD ALIGN="LEFT">
+   <%= file_field("ca_domain", "yaml")%>
+  </TD>
+ </TR>
+ <TR>
+  <TD>&nbsp;</TD><TD></TD>
+ </TR>
+ <TR>
+  <TD ALIGN="LEFT">Parent CA</TD>
+  <TD ALIGN="LEFT">
+   <%=
+    options = [["Select one", ""], ["None", "0"]]
+    @ca_domains.each do |c|
+	  options << [c.name, c.id]
+	end
+    select("ca_domain", "ca_domain_id", options)
+   %>
+  </TD>
+ </TR>
+ <TR>
+  <TD>&nbsp;</TD><TD></TD>
+ </TR>
+</TABLE>
+<p/>
+<p><%= submit_tag "Create" %></p>
+<%= end_form_tag %>
+
+<% else -%>
+ <p>
+	Private Key:<br/>
+	<pre><%= @sPKey %></pre>
+ </p>
+ <p>
+	Request:<br/>
+	<pre><%= @sReqPEM %></pre>
+ </p>
+ <p>
+	Request in Text:<br/>
+	<pre><%= @sReqText %></pre>
+ </p>
+<% end -%>
+

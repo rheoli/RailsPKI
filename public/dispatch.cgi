@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby18
+#!/rheoli/pkgs/ruby-1.8.4/bin/ruby
 
 require File.dirname(__FILE__) + "/../config/environment" unless defined?(RAILS_ROOT)
 

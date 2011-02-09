@@ -1,0 +1,8 @@
+<h2>View CAs</h2>
+<p>
+ <ul>
+  <% @ca_domains.each do |c| %>
+  <li><%= link_to(c.name, :action => "ca_domain_list", :id => c.id) %></li>
+  <% end %>
+ </ul>
+</p>

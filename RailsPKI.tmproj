@@ -3,130 +3,32 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>INSTALL.txt</string>
+	<string>lib/tasks/railspki_init_ca.rake</string>
 	<key>documents</key>
 	<array>
 		<dict>
 			<key>expanded</key>
 			<true/>
 			<key>name</key>
-			<string>app</string>
-			<key>regexFileFilter</key>
-			<string>!(/\.(?!htaccess)[^/]*|\.(tmproj|o|pyc)|/Icon\r)$</string>
-			<key>regexFolderFilter</key>
-			<string>!.*/(\.[^/]*|CVS|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
-			<key>sourceDirectory</key>
-			<string>app</string>
-		</dict>
-		<dict>
-			<key>expanded</key>
-			<true/>
-			<key>name</key>
-			<string>config</string>
-			<key>regexFileFilter</key>
-			<string>!(/\.(?!htaccess)[^/]*|\.(tmproj|o|pyc)|/Icon\r)$</string>
-			<key>regexFolderFilter</key>
-			<string>!.*/(\.[^/]*|CVS|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
-			<key>sourceDirectory</key>
-			<string>config</string>
-		</dict>
-		<dict>
-			<key>expanded</key>
-			<true/>
-			<key>name</key>
-			<string>db</string>
-			<key>regexFileFilter</key>
-			<string>!(/\.(?!htaccess)[^/]*|\.(tmproj|o|pyc)|/Icon\r)$</string>
-			<key>regexFolderFilter</key>
-			<string>!.*/(\.[^/]*|CVS|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
-			<key>sourceDirectory</key>
-			<string>db</string>
-		</dict>
-		<dict>
-			<key>expanded</key>
-			<true/>
-			<key>name</key>
-			<string>lib</string>
-			<key>regexFileFilter</key>
-			<string>!(/\.(?!htaccess)[^/]*|\.(tmproj|o|pyc)|/Icon\r)$</string>
-			<key>regexFolderFilter</key>
-			<string>!.*/(\.[^/]*|CVS|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
-			<key>sourceDirectory</key>
-			<string>lib</string>
-		</dict>
-		<dict>
-			<key>name</key>
-			<string>public</string>
-			<key>regexFileFilter</key>
-			<string>!(/\.(?!htaccess)[^/]*|\.(tmproj|o|pyc)|/Icon\r)$</string>
-			<key>regexFolderFilter</key>
-			<string>!.*/(\.[^/]*|CVS|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
-			<key>sourceDirectory</key>
-			<string>public</string>
-		</dict>
-		<dict>
-			<key>filename</key>
-			<string>INSTALL.txt</string>
-			<key>lastUsed</key>
-			<date>2006-04-18T19:52:30Z</date>
-			<key>selected</key>
-			<true/>
-		</dict>
-		<dict>
-			<key>expanded</key>
-			<true/>
-			<key>name</key>
-			<string>patches</string>
+			<string>RailsPKI</string>
 			<key>regexFolderFilter</key>
 			<string>!.*/(\.[^/]*|CVS|_darcs|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
+			<key>selected</key>
+			<true/>
 			<key>sourceDirectory</key>
-			<string>patches</string>
-		</dict>
-		<dict>
-			<key>filename</key>
-			<string>URL.txt</string>
-			<key>lastUsed</key>
-			<date>2006-04-14T11:36:23Z</date>
+			<string></string>
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
-	<integer>223</integer>
+	<integer>270</integer>
 	<key>metaData</key>
 	<dict>
-		<key>INSTALL.txt</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>18</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>app/controllers/ra_controller.rb</key>
+		<key>app/apis/backend_api.rb</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
 				<integer>13</integer>
-				<key>line</key>
-				<integer>49</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>app/views/ca/index.rhtml</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>54</integer>
 				<key>line</key>
 				<integer>6</integer>
 			</dict>
@@ -135,12 +37,110 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>app/views/layouts/ca.rhtml</key>
+		<key>app/controllers/application.rb</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>60</integer>
+				<integer>1</integer>
+				<key>line</key>
+				<integer>36</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>app/controllers/backend_controller.rb</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>app/models/auth_method.rb</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>17</integer>
+				<key>line</key>
+				<integer>26</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>app/models/ca_domain.rb</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>4</integer>
+				<key>line</key>
+				<integer>183</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>142</integer>
+		</dict>
+		<key>app/models/ca_revoke.rb</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>3</integer>
+				<key>line</key>
+				<integer>35</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>app/models/ra_reqgen.rb</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>11</integer>
+				<key>line</key>
+				<integer>59</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>app/models/ra_server.rb</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>25</integer>
+				<key>line</key>
+				<integer>24</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>app/views/ca/ca_domain_edit.rhtml</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>44</integer>
 				<key>line</key>
 				<integer>21</integer>
 			</dict>
@@ -149,21 +149,95 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>app/views/layouts/ra.rhtml</key>
+		<key>app/views/ca/ca_domain_list_item.rhtml</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>43</integer>
-				<key>line</key>
 				<integer>27</integer>
+				<key>line</key>
+				<integer>9</integer>
+			</dict>
+			<key>columnSelection</key>
+			<false/>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>22</integer>
+			</dict>
+		</dict>
+		<key>app/views/ra/cert_revoke.rhtml</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>14</integer>
+				<key>line</key>
+				<integer>13</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>app/views/layouts/system.rhtml</key>
+		<key>config/CA/RailsPKIWebserverCA.yaml</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>28</integer>
+				<key>line</key>
+				<integer>2</integer>
+			</dict>
+			<key>columnSelection</key>
+			<false/>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>6</integer>
+				<key>line</key>
+				<integer>2</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>28</integer>
+				<key>line</key>
+				<integer>2</integer>
+			</dict>
+		</dict>
+		<key>config/database.yml</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>18</integer>
+				<key>line</key>
+				<integer>11</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>config/ssl/rails_root_ca.crt</key>
 		<dict>
 			<key>caret</key>
 			<dict>
@@ -177,34 +251,173 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>app/views/ra/client_request_step1_ie.rhtml</key>
+		<key>config/ssl/server.key</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>10</integer>
+				<integer>0</integer>
 				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>lib/tasks/railspki_init_ca.rake</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>15</integer>
+				<key>line</key>
+				<integer>9</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>lib/tasks/railspki_init_ra.rake</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
 				<integer>24</integer>
+				<key>line</key>
+				<integer>7</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>1</integer>
+			<integer>0</integer>
+		</dict>
+		<key>test/fixtures/auth_methods.yml</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>test/fixtures/auth_methods_roles.yml</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>test/fixtures/ca_domains.yml</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>test/fixtures/ca_items.yml</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>test/fixtures/ra_items.yml</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>test/fixtures/roles.yml</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>test/smime/sign.rb</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>9</integer>
+				<key>line</key>
+				<integer>21</integer>
+			</dict>
+			<key>columnSelection</key>
+			<false/>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>14</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>9</integer>
+				<key>line</key>
+				<integer>21</integer>
+			</dict>
 		</dict>
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>app/controllers/ra_controller.rb</string>
-		<string>app/views/ra/client_request_step1_ie.rhtml</string>
-		<string>app/views/layouts/ra.rhtml</string>
-		<string>app/views/layouts/ca.rhtml</string>
-		<string>app/views/layouts/system.rhtml</string>
-		<string>app/views/ca/index.rhtml</string>
-		<string>INSTALL.txt</string>
+		<string>app/controllers/application.rb</string>
+		<string>app/models/auth_method.rb</string>
+		<string>app/models/ca_domain.rb</string>
+		<string>lib/tasks/railspki_init_ca.rake</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{792, 4}, {1117, 1174}}</string>
+	<string>{{666, 60}, {1187, 1118}}</string>
 </dict>
 </plist>

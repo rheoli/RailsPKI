@@ -1,0 +1,28 @@
+<h2>Edit CA '<%= @ca_domain.name %>'</h2>
+<%= error_messages_for("ca_domain") %>
+
+<%= start_form_tag :action => 'ca_domain_edit', :id => @ca_domain.id %>
+<table border="1">
+	<% if @ca_domain.pubkey != nil -%>
+	<tr>
+		<td valign="top">Subject DN</td>
+		<td><%= @ca_domain.pubkey.subject.to_s  %></td>
+	</tr>
+	<tr>
+		<td valign="top">Issuer DN</td>
+		<td><%= @ca_domain.pubkey.issuer.to_s  %></td>
+	</tr>
+	<% end -%>
+	<tr>
+		<td valign="top">different private key (PEM)</td>
+		<td><%= text_area("ca_domain", "privkey_pem", "cols" => "70", "rows" => "20")%></td>
+	</tr>
+	<tr>
+		<td valign="top">different public key (PEM)</td>
+		<td><%= text_area("ca_domain", "pubkey_pem", "cols" => "70", "rows" => "20")%></td>
+	</tr>
+</table>
+<p>
+<%= submit_tag "Change" %></p>
+<%= end_form_tag %>
+</p>

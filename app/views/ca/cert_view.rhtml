@@ -4,7 +4,7 @@
   <tr><td><b>CN</b></td><td><b>Date</td><td>State</td></tr>
   <% @ca_items.each do |c| %>
   <tr>
-    <td><%= link_to("#{c.dn} (#{c.ca_definition.name})", :action => "cert_view", :id => c.id) %></td>
+    <td><%= link_to("#{c.dn} (#{c.ca_domain.name})", :action => "cert_view", :id => c.id) %></td>
     <td><%= c.updated_on %></td>
     <td>
 	 <%= c.state %>

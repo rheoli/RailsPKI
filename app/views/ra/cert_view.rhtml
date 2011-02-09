@@ -4,9 +4,16 @@
   <tr><td><b>CN</b></td><td><b>State</td></tr>
   <% @ra_items.each do |c| %>
   <tr>
-    <td><%= link_to("#{c.dn} (#{c.ca_definition.name})", :action => "cert_view", :id => c.id) %></td>
+    <td><%= link_to("#{c.dn} (#{c.ca_domain.name})", :action => "cert_view", :id => c.id) %></td>
     <td>
 	 <%= c.state %>
+	</td>
+	<td>
+	 <% if c.ra_revoke.nil? -%>
+	  <%= link_to("Revoke", :action => "cert_revoke", :id => c.id) %>
+	 <% else -%>
+	 Revoked on <%= c.ra_revoke.created_on %> with reason <%= RaRevoke::REASONS[c.ra_revoke.reason] %>
+	 <% end -%>
 	</td>
   </tr>
   <% end %>

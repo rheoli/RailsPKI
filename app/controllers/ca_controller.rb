@@ -22,46 +22,76 @@
 #++
 
 class CaController < ApplicationController
-
   layout "ca"
+  
+  before_filter :authorize_ca
 
-  before_filter :authorize, :except => :login
+ protected
+ 
+  def authorize_ca
+    return if !authorize
+    redirect_to_access_denied("no role defined") and return if current_role.nil?
+    return if current_role.name==Role::ROLE_CA_ADMIN
+    redirect_to_access_denied("not enough privileges")
+  end
+ 
+ public
 
 # --<Admin>--
 
-  def ca_def_add
+  def ca_domain_add
     if request.get?
-      @ca_defs=CaDefinition.new
-      @ca_defs_all=CaDefinition.find_all
+      @ca_domain=CaDomain.new
+      @ca_domains=CaDomain.find_all
     else
-      @ca_defs = CaDefinition.new(params[:ca_defs])
-      @ca_defs.ca_create(params[:ca_defs])
-      if @ca_defs.save
+      if params[:ca_domain]["yaml"].class!=StringIO and params[:ca_domain]["yaml"].class!=Tempfile
+        params[:ca_domain]["yaml"]=nil
+      else
+        yaml_a=params[:ca_domain]["yaml"].to_a
+        params[:ca_domain]["yaml"]=yaml_a.to_s
+      end
+      @ca_domain = CaDomain.new(params[:ca_domain])
+      if @ca_domain.save
         #flash[:notice] = 'Product was successfully created.'
-        redirect_to :action => 'ca_def_list', :id => @ca_defs.id
+        redirect_to :action => 'ca_domain_list', :id => @ca_domain.id
       end
     end
   end
   
-  def ca_def_delete
+  def ca_domain_delete
     if params[:id] != "" then
-      @ca_defs=CaDefinition.find(params[:id])
-      @ca_defs.destroy
+      @ca_domain=CaDomain.find(params[:id])
+      @ca_domain.destroy
     end
-    redirect_to :action => 'ca_def_list', :id => nil
+    redirect_to :action => 'ca_domain_list', :id => nil
   end
 
-  def ca_def_list
-    if params[:id]!=nil
-      @ca_defs=CaDefinition.find(params[:id])
-      if @ca_defs==nil
-        redirect_to :action => 'ca_def_list', :id => nil
+  def ca_domain_edit
+    if params[:id] != "" then
+      @ca_domain=CaDomain.find(params[:id])
+      return if request.get?
+      if params[:ca_domain]["pubkey_pem"]=="" or params[:ca_domain]["privkey_pem"]==""
+        @ca_domain.errors.add("pubkey_pem", "can't be null")
+        @ca_domain.errors.add("privkey_pem", "can't be null")
         return
       end
-      @ca_defs.set_pubkey
-      render(:template=>"ca/ca_def_list_item")
+      @ca_domain.pubkey_pem=params[:ca_domain]["pubkey_pem"]
+      @ca_domain.privkey_pem=params[:ca_domain]["privkey_pem"]
+      @ca_domain.save
+    end
+    redirect_to :action => 'ca_domain_list', :id => nil
+  end
+
+  def ca_domain_list
+    if params[:id]!=nil
+      @ca_domain=CaDomain.find(params[:id])
+      if @ca_domain==nil
+        redirect_to :action => 'ca_domain_list', :id => nil
+        return
+      end
+      render(:template=>"ca/ca_domain_list_item")
     else
-      @ca_defs_all=CaDefinition.find_all
+      @ca_domains=CaDomain.find_all
     end
   end
 
@@ -72,7 +102,7 @@ class CaController < ApplicationController
     @log=[]
     RaServer.find_all.each do |rs|
       if rs.name=="-local-"
-        RaItem.find(:all, :conditions=>["state like ?", RaItem::STATE_READY_TO_SIGN]).each do |ri|
+        RaItem.find(:all, :conditions=>["state like ? or state like ?", RaItem::STATE_READY_TO_SIGN, RaItem::STATE_SIGN_APPROVED]).each do |ri|
           if CaItem.create_from_ra_item(rs.id, ri)!=nil
             @log<<"#{rs.name}: #{ri.dn} added"
             ri.state=RaItem::STATE_IN_SIGNING
@@ -100,49 +130,23 @@ class CaController < ApplicationController
     end
   end
   
+  def sync_db
+    @log=[]
+    RaServer.find_all.each do |rs|
+      next if rs.name=="-local-"
+      #-Sync Users
+    end
+  end
+
 # --<Sign>--
 
-  def sign
-    if params[:id]!=nil
-      @ca_item=CaItem.find(params[:id])
-      if @ca_item==nil
-        redirect_to :action => 'sign', :id => nil
-        return
+  def sign_approved
+    @ca_items=CaItem.find_all_by_state(CaItem::STATE_SIGN_APPROVED)
+    if request.post?
+      @ca_items.each do |item|
+        item.sign_and_save
       end
-      if request.post?
-        s_csr=nil
-        begin
-          s_csr=OpenSSL::X509::Request.new(@ca_item.csr)
-        rescue
-          s_csr=nil
-        end
-        if s_csr==nil
-          spki_csr=@ca_item.csr
-          spki_csr.gsub!(/\n/, '')
-          spki_csr.gsub!(/\r/, '')
-          begin
-            s_csr=OpenSSL::Netscape::SPKI.new(spki_csr)
-          rescue
-            s_csr=nil
-          end
-          if s_csr==nil
-            redirect_to :action => 'sign', :id => nil
-            return
-          end
-        end  
-        s_cert=@ca_item.ca_definition.ca_sign(s_csr, nil, @ca_item.dn)
-        @ca_item.crt_pem   =s_cert.to_pem
-        @ca_item.crt_serial=s_cert.serial.to_i
-        @ca_item.crt_begin =s_cert.not_before
-        @ca_item.crt_end   =s_cert.not_after
-        @ca_item.state     =CaItem::STATE_SIGNED
-        @ca_item.save
-        redirect_to :action => 'cert_view', :id => params[:id]
-      else
-        render(:template=>"ca/sign_item.rhtml")
-      end
-    else
-      @ca_items=CaItem.find(:all, :conditions=>["state like ?", CaItem::STATE_READY_TO_SIGN])
+      redirect_to :action => 'cert_view'
     end
   end
 
@@ -164,33 +168,10 @@ class CaController < ApplicationController
 # --<Others>--
 
   def index
+    
   end
 
-  def login
-    if request.get?
-      session[:user_id] = nil
-    else
-      has_access=false
-      
-      has_access=true
 
-      if has_access
-        reset_session
-        session[:user_id]="user"
-        jumpto=session[:login_jumpto] || { :action => "index" }
-        session[:login_jumpto] = nil
-        redirect_to(jumpto)
-      else
-        flash[:notice] = "Invalid user/password combination"
-      end
-    end
-  end
-  
-  def logout
-    reset_session
-    flash[:notice] = "Logged out"
-    redirect_to(:action => "login")
-  end
 
 end
 

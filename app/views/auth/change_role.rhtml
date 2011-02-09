@@ -1,0 +1,33 @@
+<!--
+ ! Excerpted from "Agile Web Development with Rails"
+ ! We make no guarantees that this code is fit for any purpose. 
+ ! Visit http://www.pragmaticprogrammer.com for more book information.
+-->
+<% if flash[:notice] -%>
+<div id="notice"><%= flash[:notice] %></div>
+<% end -%>
+
+<%= form_tag %>
+
+<table>
+  <tr>
+    <td>Choose role</td>
+    <td>
+			<%=
+		    options = "<option value=\"\">Select one</option>"
+		    @roles.each do |role|
+			  ca_domain="none"
+			  ca_domain=role.ca_domain.name if role.ca_domain_id>0
+			  options << "<option value=\"#{role.id}\">#{role.name} (#{ca_domain})</option>"
+			end
+		    select_tag :role, options
+		   %>
+	</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><input type="submit" value=" Choose " /></td>
+  </tr>
+</table>
+
+<%= end_form_tag %>

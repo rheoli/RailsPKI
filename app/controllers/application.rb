@@ -22,16 +22,31 @@
 #++
 
 class ApplicationController < ActionController::Base
-  
- private
 
-  def authorize                            #:doc:
-    unless session[:user_id]
-      flash[:notice] = "Please log in"
-      session[:login_jumpto] = request.parameters
-      redirect_to(:controller => "ca", :action => "login")
-      return
-    end
+ protected
+ 
+  def current_user
+    @current_user ||= session[:user] ? User.find_by_username(session[:user]) : nil
   end
   
+  def current_role
+    @current_role ||= session[:role] ? Role.find_by_id(session[:role]) : nil
+  end
+  
+ private
+ 
+  def redirect_to_access_denied(_info)
+    flash[:notice]=_info
+    redirect_to :controller => "auth", :action => "access_denied"
+  end
+ 
+  def authorize
+    unless session[:user]
+      flash[:notice] = "Please log in"
+      session[:login_jumpto] = request.parameters
+      redirect_to(:controller => "auth", :action => "login")
+      return(false)
+    end
+    return(true)
+  end
 end

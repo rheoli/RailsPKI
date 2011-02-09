@@ -50,9 +50,9 @@ class RaReqgen
 
   def validate
     @valid_params={}
-    ca_def=CaDefinition.find(@ca_id)
-    ca_def.dn_policy["sort_as"].each do |c|
-      if ca_def.dn_policy["dn_info"][c][0][0]!="match"
+    ca_domain=CaDomain.find(@ca_id)
+    ca_domain.dn_sort_for_sign.each do |c|
+      if ca_domain.dn_policy["dn_info"][c][0][0]!="match"
         if @params[c]==nil or @params[c]==""
           errors.add(c, "can't be null")
         else
@@ -78,13 +78,13 @@ class RaReqgen
   end
 
   def gen_request
-    ca_def=CaDefinition.find(@ca_id)
+    ca_domain=CaDomain.find(@ca_id)
     dn = []
-     ca_def.dn_policy["sort_as"].each do |c|
-       if ca_def.dn_policy["dn_info"][c][0][0]!="match"
+     ca_domain.dn_sort_for_sign.each do |c|
+       if ca_domain.dn_policy["dn_info"][c][0][0]!="match"
          dn << [c, @params[c], OpenSSL::ASN1::PRINTABLESTRING]
        else
-         dn << [c, ca_def.dn[c], OpenSSL::ASN1::PRINTABLESTRING]
+         dn << [c, ca_domain.dn[c], OpenSSL::ASN1::PRINTABLESTRING]
        end
      end
     g_dn  =OpenSSL::X509::Name.new(dn)
@@ -95,7 +95,7 @@ class RaReqgen
     g_req.public_key = g_pkey.public_key
     g_req.sign(g_pkey, OpenSSL::Digest::MD5.new)
     g_pkey_e=g_pkey.to_pem(OpenSSL::Cipher::AES.new("192-CBC"), @params["password"]) 
-    return ([g_pkey_e, g_req.to_pem, g_req.to_text])
+    return ([g_pkey_e, g_req])
   end
 
 end

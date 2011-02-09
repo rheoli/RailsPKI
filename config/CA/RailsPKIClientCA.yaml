@@ -1,0 +1,89 @@
+#=CA Definitions
+
+name: Rails PKI Client CA
+bits: 2048
+dn:
+ C: CH
+ ST: Zurich
+ L: Zurich
+ O: RailsPKI
+ OU: PKI
+ CN: Rails PKI Client CA
+ 
+dn_policy:
+ sort_as:
+  - CN
+  - OU
+  - O
+  - L
+  - ST
+  - C
+ sort_as_sign:
+  - CN
+  - UID
+  - emailAddress
+  - OU
+  - O
+  - L
+  - ST
+  - C
+ dn_info:
+   C:
+    - - match
+      - _issuer
+   ST:
+    - - match
+      - _issuer
+   L:
+    - - match
+      - _issuer
+   O:
+    - - match
+      - _issuer
+   OU:
+    - - supplied
+      - _nil
+   CN:
+    - - supplied
+      - _nil
+   UID:
+    - - supplied
+      - _nil
+   emailAddress:
+    - - supplied
+      - _nil
+
+extensions:
+ default:
+  basicConstraints:
+   - true
+   - CA:TRUE
+  keyUsage:
+   - true
+   - keyCertSign, cRLSign
+  subjectKeyIdentifier:
+   - false
+   - hash
+  authorityKeyIdentifier:
+   - false
+   - keyid:always
+  X509v3 CRL Distribution Points:
+   - false
+   - URI:https://railspki.rubyforge.org/certs/clientca.crl
+ sign:
+  basicConstraints:
+   - true
+   - CA:FALSE
+  keyUsage:
+   -
+  extendedKeyUsage:
+   - false
+   - emailProtection, clientAuth
+  issuerAltName:
+   - false
+   - issuer:copy
+  subjectAltName:
+   - false
+   - email
+
+#=EOF

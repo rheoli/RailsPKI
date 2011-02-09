@@ -4,4 +4,5 @@ class BackendApi < ActionWebService::API::Base
   api_method :find_request_by_id,
              :expects => [:int],
              :returns => [RaItem]
+  api_method 
 end
