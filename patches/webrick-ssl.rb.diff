@@ -1,0 +1,44 @@
+--- webrick.rb	2006-04-10 19:53:47.000000000 +0200
++++ webrick-ssl.rb	2006-04-11 21:11:05.000000000 +0200
+@@ -1,8 +1,9 @@
+ require 'webrick'
++require 'webrick/https'
+ require 'optparse'
+ 
+ OPTIONS = {
+-  :port            => 3000,
++  :port            => 3443,
+   :ip              => "0.0.0.0",
+   :environment     => (ENV['RAILS_ENV'] || "development").dup,
+   :server_root     => File.expand_path(RAILS_ROOT + "/public/"),
+@@ -54,6 +55,28 @@
+ 
+ OPTIONS['working_directory'] = File.expand_path(RAILS_ROOT)
+ 
+-puts "=> Rails application started on http://#{OPTIONS[:ip]}:#{OPTIONS[:port]}"
++puts "=> Rails application started on https://#{OPTIONS[:ip]}:#{OPTIONS[:port]}"
+ puts "=> Ctrl-C to shutdown server; call with --help for options" if OPTIONS[:server_type] == WEBrick::SimpleServer
+-DispatchServlet.dispatch(OPTIONS)
++
++class SSLDispatchServlet < DispatchServlet
++  def self.dispatch(options)
++    Socket.do_not_reverse_lookup = true # patch for OS X
++    server = WEBrick::HTTPServer.new(
++      :Port            => options[:port].to_i,
++      :ServerType      => options[:server_type],
++      :BindAddress     => options[:ip],
++      :SSLEnable       => true,
++      :SSLVerifyClient => ::OpenSSL::SSL::VERIFY_NONE, # | ::OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT,
++      :SSLVerifyDepth  => 2,
++      :SSLCACertificateFile => RAILS_ROOT + "/config/ssl/ca.crt",
++      :SSLPrivateKey   => ::OpenSSL::PKey::RSA.new(File.read(RAILS_ROOT+ "/config/ssl/rails.key")),
++      :SSLCertificate  => ::OpenSSL::X509::Certificate.new(File.read(RAILS_ROOT + "/config/ssl/rails.crt")))
++    server.mount('/', DispatchServlet, options)
++    trap("INT") { server.shutdown }
++    server.start
++  end
++end
++
++puts "=> Rails application started on https://#{OPTIONS[:ip]}:#{OPTIONS[:port]}"
++SSLDispatchServlet.dispatch(OPTIONS)
++

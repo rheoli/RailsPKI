@@ -1,0 +1,18 @@
+<h2>Client Request Certificate (Step 0)</h2>
+<p>
+    <%= start_form_tag({:action => 'client_request'},{:method => "GET"}) %>
+    
+    <table border="0">
+      <td align="left">Select Browser</td>
+      <td align="left">
+	   <select name="browser">
+		<option value="">Select one</option>
+		<option value="moz">Mozilla, Firefix, Safari</option>
+		<option value="ie">Internet Explorer</option>
+       </select>
+      </td>
+     </tr>
+     </table>
+     <%= submit_tag "Next" %>
+     <%= end_form_tag %>
+</p>

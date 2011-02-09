@@ -1,0 +1,8 @@
+<h2>View Certificate</h2>
+<p>
+<%= @ra_item.dn %> (<%= @ra_item.ca_definition.name %>)
+</p>
+<p>
+<pre><%= @ra_item.crt_pem %></pre>
+<pre><%= OpenSSL::X509::Certificate.new(@ra_item.crt_pem).to_text %></pre>
+</p>

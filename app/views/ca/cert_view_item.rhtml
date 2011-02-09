@@ -1,0 +1,8 @@
+<h2>Sign Requests</h2>
+<p>
+<%= @ca_item.dn %> (<%= @ca_item.ca_definition.name %>)
+</p>
+<p>
+<pre><%= @ca_item.crt_pem %></pre>
+<pre><%= OpenSSL::X509::Certificate.new(@ca_item.crt_pem).to_text %></pre>
+</p>

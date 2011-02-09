@@ -1,0 +1,29 @@
+<h2>Client Request Certificate (Step 1)</h2>
+<p>
+    <%= error_messages_for("ra_item") %>
+
+    <%= start_form_tag :action => 'client_request' %>
+    
+    <table border="0">
+      <td align="left">Select Signing CA</td>
+      <td align="left">
+       <%=
+        options = [["Select one", ""]]
+        @ca_defs_all.each do |c|
+          options << [c.name, c.id]
+        end
+        select("ra_item", "ca_definition_id", options)
+       %>
+      </td>
+     </tr>
+     <tr>
+      <td align="left">Request</td>
+      <td align="left">
+       	<input type="hidden" name="challenge" id="challenge" value="challenge">
+	    <KEYGEN NAME="ra_item[csr]" CHALLENGE="challenge">
+      </td>
+     </tr>
+     </table>
+     <%= submit_tag "Submit" %>
+     <%= end_form_tag %>
+</p>

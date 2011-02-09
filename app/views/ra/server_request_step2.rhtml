@@ -1,0 +1,30 @@
+<h2>Request Server Certificate (Step 2)</h2>
+
+<%= error_messages_for("ra_item") %>
+
+<%= start_form_tag :action => 'server_request' %>
+
+<table border="0">
+ <% @ra_item.ca_definition.dn_policy["sort_as"].each do |c| %>
+ <tr>
+  <td align="left"><%= c %></td>
+  <td align="left">
+   <% if @ra_item.ca_definition.dn_policy["dn_info"][c][0][0]=="match" -%>
+    <%= @ra_item.ca_definition.dn[c] %>
+   <% else -%>
+    <%= text_field("ra_item", "subject_#{c}", "size"=>"40") %>
+
+<!--><div class="fieldWithErrors"></div>-->
+
+   <% end -%>
+  </td>
+ </tr>
+ <% end %>
+ <tr>
+  <td>&nbsp;</td><td></td>
+ </tr>
+</table>
+<p/>
+<p><%= submit_tag "Request" %></p>
+<%= end_form_tag %>
+

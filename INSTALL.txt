@@ -1,0 +1,18 @@
+========================
+ RailsPKI Version 0.0.1
+========================
+ 
+Requiremens:
+ - Ruby 1.8.4 (with OpenSSL Extension)
+ - SQLite >= 3.2.8
+ - sqlite3-ruby 1.1.0
+ - Ruby on Rails >= 1.0.0 (tested with 1.1.2)
+ 
+Installation:
+ - Unpack Package somewhere
+ - change directory to somewhere/RailsPKI
+ - call rake migrate
+ - call script/server
+ - now you can call RailsPKI on http://localhost/ca
+ - login (any username/password works)
+ 

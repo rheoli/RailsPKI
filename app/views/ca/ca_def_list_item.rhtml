@@ -1,0 +1,22 @@
+<h2>View CA '<%= @ca_defs.name %>'</h2>
+<table border="1">
+	<% if @ca_defs.ca_cert != nil -%>
+	<tr>
+		<td valign="top">Subject DN</td>
+		<td><%= @ca_defs.ca_cert.subject.to_s  %></td>
+	</tr>
+	<tr>
+		<td valign="top">Issuer DN</td>
+		<td><%= @ca_defs.ca_cert.issuer.to_s  %></td>
+	</tr>
+	<% end -%>
+	<tr>
+		<td valign="top">PEM</td>
+		<td><pre><%= @ca_defs.pubkey_pem %></pre></td>
+	</tr>
+</table>
+<p>
+<%= start_form_tag :action => 'ca_def_delete', :id => @ca_defs.id %>
+<%= submit_tag "Delete" %></p>
+<%= end_form_tag %>
+</p>

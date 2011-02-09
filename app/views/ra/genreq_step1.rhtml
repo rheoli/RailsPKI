@@ -1,0 +1,23 @@
+<h2>Generate request</h2>
+
+<%= error_messages_for("ra_req") %>
+
+<%= start_form_tag :action => 'genreq' %>
+
+<TABLE BORDER="0">
+ </TR>
+ <TD ALIGN="LEFT">Sign CA</TD>
+ <TD ALIGN="LEFT">
+  <select name="ca_id">
+   <option value="">Select one</option>
+   <% @ca_defs_all.each do |c| %>
+	<option value="<%= c.id %>"><%= c.name %></option>
+   <% end %>
+  </select>
+ </TD>
+ </TR>
+</TABLE>
+<p/>
+<p><%= submit_tag "Next Step" %></p>
+<%= end_form_tag %>
+

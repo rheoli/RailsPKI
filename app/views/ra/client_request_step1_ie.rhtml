@@ -1,0 +1,173 @@
+<script language="VBSCRIPT">
+<!--
+
+  dim PROV_RSA_FULL
+  dim OLD_XENROLL
+  dim NEW_XENROLL
+
+  PROV_RSA_FULL = 1
+  OLD_XENROLL   = 0
+  NEW_XENROLL   = 1
+
+  Function getXEnroll
+    dim tester
+
+    On Error Resume Next
+
+    tester = certHelperOld.MyStoreName
+    if Len (tester) > 0 then
+      getXEnroll = OLD_XENROLL
+      //MsgBox ("You are using an old Internet Explorer with a security bug in XEnroll.dll (MS02-48).")
+    else
+      tester = certHelperNew.MyStoreName
+      if Len (tester) > 0 then
+        getXEnroll = NEW_XENROLL
+        //MsgBox ("You are using patched Internet Explorer.")
+      end if
+    end if
+  End Function
+
+  sub FindProviders
+    dim prov
+    dim name
+    dim element
+    dim xenroll
+
+    On Error Resume Next
+
+    xenroll = getXEnroll
+    prov=0
+    document.CertReqForm.CspProvider.selectedIndex = 0
+    do
+      name = ""
+      if xenroll = OLD_XENROLL then
+        name = certHelperOld.enumProviders(prov,0)
+      else
+        name = certHelperNew.enumProviders(prov,0)
+      end if
+      if Len (name) = 0 then
+        exit do
+      else
+        set element = document.createElement("OPTION") 
+        element.text = name
+        element.value = name
+        document.CertReqForm.CspProvider.add(element) 
+        prov = prov + 1
+      end if
+    loop
+  end sub
+
+  Sub GenReq_OnClick
+    Dim TheForm
+    Dim xenroll
+    Dim sz10
+    Set TheForm = Document.CertReqForm
+
+    xenroll = getXEnroll
+
+    //msg = "I agree to protect my private key in accordance with College Policy, just as I protect my DND password." & vbCrLf & "I will not allow anyone else to have access to my private key or password." & vbCrLf & "I will not share copies of my private key with anyone, including family members." & vbCrLf & "I will set a strong password for the private key even when that is not the default response of the system." & vbCrLf & "I will not let the Operating System or other software save the password to the private key." & vbCrLf & "I will not leave a private key issued to me installed on a computer not under my direct control or ownership (eg. on public computers or in Internet Cafes)." & vbCrLf & "I will inform the Dartmouth College Certificate Authority (CA-security-officer@Dartmouth.EDU) immediately should I believe the security of my private key has been compromised." & vbCrLf & "I understand that when I use my certificate to access remote services that I am also providing the remote server with my name and email address. "
+    //ans = MsgBox(msg, vbOkCancel, "Certificate Agreement")
+    //If (ans <> 1 ) Then
+	//  ret = MsgBox("No certificate can be issued.", 0, "MSIE Certificate Request")
+	//  TheForm.csr.Value = null
+	//  Exit Sub
+	//End If
+	
+	szName = "CN=-dummy-"
+	
+	On Error Resume Next
+
+	//set options = TheForm.CspProvider.options
+    //index = options.selectedIndex
+    //Enroll.providerType = options(index).value
+    //Enroll.providerName = options(index).text
+    //Enroll.GenKeyFlags = 3
+    //szCertReq = Enroll.createPKCS10(szName, "1.3.6.1.5.5.7.3.2")
+	
+	if xenroll = OLD_XENROLL then
+	  certHelperOld.providerType = PROV_RSA_FULL
+	  certHelperOld.HashAlgorithm = "SHA1"
+	  certHelperOld.KeySpec = 1
+	  certHelperOld.GenKeyFlags = 67108867
+	  sz10 = certHelperOld.CreatePKCS10(szName, "1.3.6.1.4.1.311.2.1.21")
+	else
+	  certHelperNew.providerType = PROV_RSA_FULL
+	  certHelperNew.HashAlgorithm = "SHA1"
+	  certHelperNew.KeySpec = 1
+	  certHelperNew.GenKeyFlags = 67108867
+	  sz10 = certHelperNew.CreatePKCS10(szName, "1.3.6.1.4.1.311.2.1.21")
+	end if
+	
+	if Len(sz10) = 0 then 
+	  if xenroll = OLD_XENROLL then
+	    certHelperOld.GenKeyFlags = 67108866
+	    sz10 = certHelperOld.CreatePKCS10(dn, "1.3.6.1.4.1.311.2.1.21")
+	  else
+	    certHelperNew.GenKeyFlags = 67108866
+	    sz10 = certHelperNew.CreatePKCS10(dn, "1.3.6.1.4.1.311.2.1.21")
+	  end if
+	  if Len(theForm.asn1.value) = 0 then 
+	    MsgBox ("BadBad") 
+	    Exit Sub
+	  end if
+	end if
+	
+    TheForm.csr.Value = sz10
+
+    TheForm.Submit
+	Exit Sub
+  End Sub
+
+-->      
+</script>
+
+<h2>Client Request Certificate (Step 1)</h2>
+<p>
+    <%= error_messages_for("ra_item") %>
+
+    <%= start_form_tag({:action => 'client_request'}, {:name => "CertReqForm"}) %>
+    
+    <table border="0">
+      <td align="left">Select Signing CA</td>
+      <td align="left">
+       <%=
+        options = [["Select one", ""]]
+        @ca_defs_all.each do |c|
+          options << [c.name, c.id]
+        end
+        select("ra_item", "ca_definition_id", options)
+       %>
+      </td>
+     </tr>
+     <tr>
+      <td align="left">Select Provider</td>
+      <td align="left">
+       	<select name="CspProvider">
+	    </select>
+      </td>
+     </tr>
+     <tr>
+      <td align="left">Select Keysize</td>
+      <td align="left">
+	    <select name=keysize>
+	      <option value="512">512</option>
+	      <option value="1024" selected>1024</option>
+	      <option value="2048">2048</option>
+	    </select>
+      </td>
+     </tr>
+     </table>
+     <input type="hidden" name="csr" value="">
+     <%= submit_tag("Submit", {:name => "GenReq"}) %>
+     <%= end_form_tag %>
+	 <object
+	  classid="clsid:43f8f289-7a20-11d0-8f06-00c04fc295e1"
+	  codebase="xenroll.dll"
+	  id="certHelperOld">
+	 </object>
+	 <object
+	   classid="clsid:127698e4-e730-4e5c-a2b1-21490a70c8a1"
+	   codebase="xenroll.dll"
+	   id="certHelperNew">
+	 </object>
+</p>

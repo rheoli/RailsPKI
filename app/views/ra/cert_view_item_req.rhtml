@@ -1,0 +1,14 @@
+<h2>View Request</h2>
+<p>
+<%= @ra_item.dn %> (<%= @ra_item.ca_definition.name %>)
+</p>
+<p>
+<pre><%= @ra_item.csr %></pre>
+<pre><%= 
+ begin
+  OpenSSL::X509::Request.new(@ra_item.csr).to_text
+ rescue
+  OpenSSL::Netscape::SPKI.new(@ra_item.csr).to_text
+ end
+%></pre>
+</p>

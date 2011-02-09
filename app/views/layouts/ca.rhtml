@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<title>RailsPKI</title>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<meta name="description" content="Your website description goes here" />
+<meta name="keywords" content="your,keywords,goes,here" />
+<%= stylesheet_link_tag "blue", :media => "screen,projection" %>
+</head>
+
+<body>
+<div id="container" >
+
+<div id="header">
+<h1>RailsPKI</h1>
+<h2>The CA Instance</h2>
+</div>
+
+<div id="navigation">
+<ul>
+<% if session[:user_id] -%>
+<li class="selected"><%= link_to("Home", :controller => "ca") %></li>
+<% else -%>
+<li class="selected">&nbsp;Login&nbsp;</li>
+<% end -%>
+</ul>
+</div>
+
+<div id="content">
+<%= @content_for_layout %>
+
+<p>&nbsp;</p>
+</div>
+
+
+<div id="footer">
+<p>&copy; 2005-06 <a href="#">Stephan Toggweiler</a> | Design by <a href="http://andreasviklund.com">Andreas Viklund</a></p>
+</div>
+
+</div>
+</body>
+</html>

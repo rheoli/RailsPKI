@@ -1,0 +1,8 @@
+<h2>View CAs</h2>
+<p>
+ <ul>
+  <% @ca_defs_all.each do |c| %>
+  <li><%= link_to(c.name, :action => "ca_def_list", :id => c.id) %></li>
+  <% end %>
+ </ul>
+</p>

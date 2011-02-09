@@ -1,0 +1,28 @@
+<h2>Request Server Certificate (Step 1)</h2>
+<p>
+    <%= error_messages_for("ra_item") %>
+
+    <%= start_form_tag :action => 'server_request' %>
+    
+    <table border="0">
+      <td align="left">Select Signing CA</td>
+      <td align="left">
+       <%=
+        options = [["Select one", ""]]
+        @ca_defs_all.each do |c|
+          options << [c.name, c.id]
+        end
+        select("ra_item", "ca_definition_id", options)
+       %>
+      </td>
+     </tr>
+     <tr>
+      <td align="left">Request</td>
+      <td align="left">
+       <%= text_area("ra_item", "csr", "cols" => "70", "rows" => "20")%>
+      </td>
+     </tr>
+     </table>
+     <%= submit_tag "Submit" %>
+     <%= end_form_tag %>
+</p>

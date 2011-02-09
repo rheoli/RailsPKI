@@ -1,0 +1,13 @@
+#=RailsPKI Databases
+
+development:
+  adapter: sqlite3
+  dbfile: db/railspki_dev.db3
+
+test:
+  adapter: sqlite3
+  dbfile: db/railspki_test.db3
+
+production:
+  adapter: sqlite3
+  dbfile: db/railspki_prod.db3
