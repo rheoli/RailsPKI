@@ -1,0 +1,46 @@
+-------
+ MODEL
+-------
+
+
+Person -has_many-> RA Role -has_one-> RA Type -has_one-> CA Certificate
+
+----- App domain ----|-------- Authorization conf ---------|------- App domain ------
+
+                      includes                   includes
+                       .--.                        .---.
+                       |  v                        |   v
+ .------.  can_play  .------.  has_permission  .------------.  requires  .----------.
+ | User |----------->| Role |----------------->| Permission |<-----------| Activity |
+ '------' *        * '------' *              * '------------' 1        * '----------'
+                                                     |
+                                             .-------+------.
+                                          1 /        | 1     \ *
+                                .-----------.   .---------.  .-----------.
+                                | Privilege |   | Context |  | Attribute |
+                                '-----------'   '---------'  '-----------'
+
+
+INSTALL
+-------
+
+1) $ script/generate authenticated user sessions
+2) Move "include AuthenticatedSystem" to ApplicationController
+3) Add +filter_access_to+ calls as described above.
+4) * If you'd like to use model security, add a before_filter that sets the user 
+  globally to your ApplicationController.  This is thread-safe.
+   before_filter :set_current_user
+   protected
+   def set_current_user
+     Authorization.current_user = current_user
+   end
+5) $ script/generate model role
+6) in roles migration:
+   t.column :title, :string
+   t.references :user
+7) in role model -> belongs_to :user
+8) in user model:
+  has_many :roles
+  def role_symbols
+    (roles || []).map {|r| r.title.to_sym}
+  end
