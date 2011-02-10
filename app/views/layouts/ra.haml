@@ -1,0 +1,31 @@
+!!! 1.1
+%html
+  %head
+    %title= "#{RailsPKI::Config[:name]} - The RA Instance"
+    %meta{'http-equiv'=>"content-type", :ontent=>"text/html; charset=iso-8859-1"}/
+    %meta{:name=>"description", :content=>"RailsPKI - PKI Implemented in Ruby on Rails"}/
+    %meta{:name=>"keywords", :content=>"pki,rails,railspki,ruby"}/
+    = stylesheet_link_tag "green", :media => "screen,projection"
+    = stylesheet_link_tag 'redbox'
+    = javascript_include_tag :defaults
+    = javascript_include_tag 'redbox'
+%body{:onLoad=>@body_on_load}
+  %div#container
+    %div#header
+      %h1= RailsPKI::Config[:name]
+      %h2 The RA Instance
+      %h3= "Logged in as: #{session[:user]}"
+    %div#navigation
+      %ul
+        - if session[:user]
+          %li.selected= link_to("Home", :controller=>'ra', :action=>'index')
+          %li &nbsp;
+          %li= link_to("Change role", :controller=>'auth', :action=>'change_role')
+          %li &nbsp;
+          %li= link_to("Logout", :controller=>'auth', :action=>'logout')
+    %div#content
+      = @content_for_layout
+      %p &nbsp
+    %div#footer
+      %p &copy; 2005-07 <a href="#">Stephan Toggweiler</a> | Design by <a href="http://andreasviklund.com">Andreas Viklund</a>
+

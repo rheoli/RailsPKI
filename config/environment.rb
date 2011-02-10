@@ -4,14 +4,20 @@
 # you don't control web/app server and can't set it the proper way
 # ENV['RAILS_ENV'] ||= 'production'
 
+# Specifies gem version of Rails to use when vendor/rails is not present
+RAILS_GEM_VERSION = '1.2.3' unless defined? RAILS_GEM_VERSION
+
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
 
 Rails::Initializer.run do |config|
-  # Settings in config/environments/* take precedence those specified here
+  # Settings in config/environments/* take precedence over those specified here
   
-  # Skip frameworks you're not going to use
+  # Skip frameworks you're not going to use (only works if using vendor/rails)
   # config.frameworks -= [ :action_web_service, :action_mailer ]
+
+  # Only load the plugins named here, by default all plugins in vendor/plugins are loaded
+  # config.plugins = %W( exception_notification ssl_requirement )
 
   # Add additional load paths for your own custom dirs
   # config.load_paths += %W( #{RAILS_ROOT}/extras )
@@ -21,12 +27,13 @@ Rails::Initializer.run do |config|
   # config.log_level = :debug
 
   # Use the database for sessions instead of the file system
-  # (create the session table with 'rake create_sessions_table')
+  # (create the session table with 'rake db:sessions:create')
   # config.action_controller.session_store = :active_record_store
 
-  # Enable page/fragment caching by setting a file-based store
-  # (remember to create the caching directory and make it readable to the application)
-  # config.action_controller.fragment_cache_store = :file_store, "#{RAILS_ROOT}/cache"
+  # Use SQL instead of Active Record's schema dumper when creating the test database.
+  # This is necessary if your schema can't be completely dumped by the schema dumper, 
+  # like if you have constraints or database-specific column types
+  # config.active_record.schema_format = :sql
 
   # Activate observers that should always be running
   # config.active_record.observers = :cacher, :garbage_collector
@@ -34,10 +41,6 @@ Rails::Initializer.run do |config|
   # Make Active Record use UTC-base instead of local time
   # config.active_record.default_timezone = :utc
   
-  # Use Active Record's schema dumper instead of SQL when creating the test database
-  # (enables use of different database adapters for development and test environments)
-  # config.active_record.schema_format = :ruby
-
   # See Rails::Configuration for more options
 end
 
@@ -50,4 +53,23 @@ end
 #   inflect.uncountable %w( fish sheep )
 # end
 
+# Add new mime types for use in respond_to blocks:
+# Mime::Type.register "text/richtext", :rtf
+# Mime::Type.register "application/x-mobile", :mobile
+
 # Include your application configuration below
+
+ActionWebService::API::Base.allow_active_record_expects=true
+
+#-Code from mailr
+default_config_path = 'config/railspki_default'
+default_config = File.join(RAILS_ROOT, default_config_path)
+require default_config
+begin
+  require File.join(RAILS_ROOT, 'config/railspki_site')
+  RailsPKI::Config.update(RailsPKI::LocalConfig) if RailsPKI::LocalConfig
+rescue LoadError
+  STDERR.puts 'WARNING: config/railspki_site.rb not found, using default settings from ' + default_config_path
+end
+
+#-EoCfM

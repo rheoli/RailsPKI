@@ -1,0 +1,19 @@
+%h2 View CA Domains
+%p
+  %table{:border=>"1",:cellspacing=>"0"}
+    %tr
+      %td
+        %b Name
+      %td
+        %b Date
+      %td
+        %b Cmd
+    - @db_views.each do |ras|
+      %tr
+        %td= link_to(ras.name, :action => "view_ca_domain", :id => ras.id)
+        %td= ras.updated_on
+        %td
+          = link_to("Edit", :action => "edit_ca_domain", :id => ras.id)
+          = link_to("Delete", :action => "delete_ca_domain", :id => ras.id)
+%br/
+= link_to("Add new CA Domain", :action=>"edit_ca_domain", :id=>nil)

@@ -1,0 +1,18 @@
+ActiveRecordBaseWithLdap
+========================
+
+This plugin is derived from ActiveRecordBaseWithoutTable from Jonathan Viney.
+
+Get the power of ActiveRecord models, including validation, without having a table in the database.
+
+  class Contact < ActiveRecord::BaseWithLdap
+    column :name, :string
+    column :email_address, :string
+    column :message, :text
+    
+    validates_presence_of :name, :email_address, :string
+
+    ldap_
+  end
+  
+Any bugs, questions, comments please feel free to email me: 

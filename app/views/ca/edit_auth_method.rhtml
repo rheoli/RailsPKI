@@ -1,0 +1,41 @@
+<% if @db_view.name.nil? -%>
+  <h2>Add AuthMethod</h2>
+<% else -%>
+  <h2>Edit AuthMethod '<%= @db_view.name %>'</h2>
+<% end -%>
+
+<%= error_messages_for("db_view") %>
+
+<%= start_form_tag :action => 'edit_auth_method', :id => @db_view.id %>
+<table border="1">
+ <tr>
+  <td valign="top">Name</td>
+  <td>
+   <%= text_field("db_view", "name", "size"=>"40") %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">Type</td>
+  <td>
+    <input type="text" name="db_view[type]" id="db_view_type" value="<%= @db_view.meth[:type] %>">
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">Check</td>
+  <td>
+    <textarea name="db_view[check]" id="db_view_check" cols="80" rows="10">
+<% @db_view.meth[:check].each do |name, val| -%>
+<%= name %>: <%= val %>
+<% end -%>
+    </textarea>
+  </td>
+ </tr>
+</table>
+<br/>
+<% if @db_view.name.nil? -%>
+  <%= submit_tag "Add" %>
+<% else -%>
+  <%= submit_tag "Change" %>
+<% end -%>
+<%= end_form_tag %>
+</p>

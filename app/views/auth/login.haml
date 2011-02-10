@@ -1,0 +1,17 @@
+- if flash[:notice]
+  %div#notice= flash[:notice]
+
+- form_tag do
+  %table
+    %tr
+      %td User name:
+      %td= text_field("user", "username")
+    %tr
+      %td Password:
+      %td= password_field("user", "password")
+    %tr
+      %td
+      %td
+        %br/
+        %input{:type=>"submit", :value=>" Login "}
+

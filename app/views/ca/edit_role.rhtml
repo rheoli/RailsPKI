@@ -1,0 +1,73 @@
+<% if @db_view.name.nil? -%>
+  <h2>Add Role</h2>
+<% else -%>
+  <h2>Edit Role '<%= @db_view.name %>'</h2>
+<% end -%>
+
+<%= error_messages_for("db_view") %>
+
+<%= start_form_tag :action => 'edit_role', :id => @db_view.id %>
+<table border="1">
+ <tr>
+  <td valign="top">Role</td>
+  <td>
+   <%=
+    options = [["Select one", ""]]
+    Role.constants.each do |name|
+      next if name[0,5]!="ROLE_"
+      id=Role.const_get(name)
+      options << [id, id]
+    end
+    select("db_view", "name", options)
+   %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">Certificate</td>
+  <td>
+   <%=
+    options = [["Select one", ""], ["Local", 0]]
+    @ca_domains.each do |c|
+      options << [c.name, c.id]
+    end
+    select("db_view", "ca_domain_id", options)
+   %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">RA Server</td>
+  <td>
+   <%=
+    options = [["Select one", ""]]
+    @ra_servers.each do |c|
+      options << [c.name, c.id]
+    end
+    select("db_view", "ra_server_id", options)
+   %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">AuthMethods</td>
+  <td>
+   <%
+    am_ids=[]
+    @db_view.auth_methods.each do |am|
+      am_ids<<am.id
+    end
+   -%>
+   <select name="db_view[auth_methods][]" size="10" multiple>
+   <% @auth_methods.each do |am| -%>
+    <option value="<%= am.id %>" <%= "selected" if am_ids.include?(am.id) %>><%= am.name %></option>
+   <% end -%>
+   </select>
+  </td>
+ </tr>
+</table>
+<br/>
+<% if @db_view.name.nil? -%>
+  <%= submit_tag "Add" %>
+<% else -%>
+  <%= submit_tag "Change" %>
+<% end -%>
+<%= end_form_tag %>
+</p>

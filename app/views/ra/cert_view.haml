@@ -1,0 +1,25 @@
+%h2 View Request/Certificate
+%p
+  %table{:border=>"1",:cellspacing=>"0",:width=>"700"}
+    %tr
+      %td <b>CN</b>
+      %td <b>State</b>
+      %td <b>Expiry</b>
+    - now=Time.now
+    - @ra_items.each do |c|
+      - color="#FFC57F"
+      - color="#62C46F" if c.state=="signed"
+      - color="#FFA59F" if !c.crt_end.nil? and ((c.crt_end-now).to_i/3600/24)<0
+      - color="#FF857F" if !c.ra_revoke.nil?
+      %tr{:bgcolor=>color}
+        %td= link_to("#{c.dn["CN"]} (#{c.ca_domain.name})", :action => "cert_view", :id => c.id)
+        %td
+          - if !c.ra_revoke.nil?
+            revoked
+          - else
+            = c.state
+        %td
+          - if c.crt_end!=nil
+            = "#{(c.crt_end-now).to_i/3600/24} day(s)"
+          - else
+            Request

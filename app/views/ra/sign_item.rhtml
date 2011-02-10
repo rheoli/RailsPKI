@@ -1,0 +1,22 @@
+<h2>Sign Requests</h2>
+<p>
+<%= @ra_item.dn %> (<%= @ra_item.ca_domain.name %>)
+<%= error_messages_for("ra_item") %>
+</p>
+<p>
+<%= start_form_tag :action => 'sign', :id => @ra_item.id %>
+ <tr>
+  <td>Duration</td>
+  <td>
+  <%=
+    options=[["1","1"],["2","2"],["3","3"]]
+    select("ra_item", "duration", options)
+  %> Year(s)
+  </td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td><td></td>
+ </tr>
+<%= submit_tag "Sign" %></p>
+<%= end_form_tag %>
+</p>

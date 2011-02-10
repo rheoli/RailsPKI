@@ -1,0 +1,19 @@
+- if flash[:notice]
+  %div#notice= flash[:notice]
+
+- form_tag do
+  %table
+    %tr
+      %td Choose role
+      %td
+        - options = "<option value=\"\">Select one</option>"
+        - @roles.each do |role|
+          - ca_domain="none"
+          - ca_domain=role.ca_domain.name if role.ca_domain_id>0
+          - options << "<option value=\"#{role.id}\">#{role.name} (#{ca_domain})</option>"
+        = select_tag :role, options
+    %tr
+      %td &nbsp;
+      %td
+        %input{:type=>"submit", :value=>" Choose "}/
+

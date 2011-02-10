@@ -1,0 +1,34 @@
+<h2>View Role</h2>
+
+<table border="1">
+ <tr>
+  <td valign="top">Role</td>
+  <td>
+   <%= @db_view.name %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">Certificate</td>
+  <td>
+   <%= (@db_view.ca_domain.name if !@db_view.ca_domain.nil?) ||"Any" %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">RA Server</td>
+  <td>
+   <%= @db_view.ra_server.name %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">Auth Methods</td>
+  <td>
+   <ul>
+   <% @db_view.auth_methods.each do |auth| -%>
+    <li><%= auth.name %></li>
+   <% end -%>
+   </ul>
+  </td>
+ </tr>
+</table>
+<br/>
+</p>

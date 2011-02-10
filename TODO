@@ -1,0 +1,16 @@
+TODO
+====
+
+General
+-------
+ * change rhtml to haml
+ * use Apache2 and Mongrel instead of Webrick
+
+CA
+--
+
+
+RA
+--
+ * Renew/Reissue Process
+

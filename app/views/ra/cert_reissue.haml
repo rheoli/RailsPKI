@@ -1,0 +1,44 @@
+%h2 Reissue Certificate
+%p
+  %table{:border=>"1",:cellpadding=>"1",:cellspacing=>"0"}
+    - @ra_item.dn.each do |key, val|
+      %tr
+        %td= key
+        %td= val
+    - color="#FFC57F"
+    - color="#62C46F" if @ra_item.state=="signed"
+    - color="#FF857F" if !@ra_item.ra_revoke.nil?
+    %tr{:bgcolor=>color}
+      %td State
+      %td
+        - if !@ra_item.ra_revoke.nil?
+          revoked
+        - else
+          = @ra_item.state
+    %tr
+      - ca_path=[]
+      - ca=@ra_item.ca_domain
+      - while !ca.nil?
+        - ca_path<<ca
+        - ca=ca.ca_domain
+      - ca_max=ca_path.size
+      %td{:valign=>"top"} Signer Path
+      %td
+        %table{:border=>"0"}
+          - ca_count=0
+          - ca_path.reverse.each do |ca|
+            %tr
+              - 0.upto(ca_count-1) do |c|
+                %td &nbsp;&nbsp;
+              %td{:colspan=>ca_max-ca_count}= link_to(ca.name, :action => "ca_view", :id => ca.id)
+            - ca_count+=1
+%p
+  = start_form_tag :action => 'cert_reissue'
+  %table{:border=>"1",:cellpadding=>"1",:cellspacing=>"0"}
+    %tr
+      %td{:align=>"left",:valign=>"top"} Request
+      %td{:align=>"left",:valign=>"top"}
+        %textarea{:cols=>"70",:id=>"csr",:name=>"csr",:rows=>"20"}
+  = submit_tag "Reissue"
+  = end_form_tag
+

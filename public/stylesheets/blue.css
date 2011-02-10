@@ -13,7 +13,7 @@ background:#e8eaec;
 }
 
 a{
-color:#467aa7;
+color:#111111;
 font-weight:bold;
 text-decoration:none;
 background-color:inherit;
@@ -99,6 +99,14 @@ font-weight:normal;
 #header h2{
 margin:10px 0 0 40px;
 font-size:1.4em;
+background-color:inherit;
+color:#f0f2f4;
+letter-spacing:-1px;
+font-weight:normal;
+}
+#header h3{
+margin:7px 0 0 50px;
+font-size:0.8em;
 background-color:inherit;
 color:#f0f2f4;
 letter-spacing:-1px;

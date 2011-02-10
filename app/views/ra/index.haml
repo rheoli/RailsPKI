@@ -1,0 +1,13 @@
+%h2 RA Home
+- menu=[["View Requests/Certificates","cert_view"]]
+- menu<<["Request Server Certificate","server_request"]
+- menu<<["Client Request",            "client_request"]
+- menu<<["Generate request",          "genreq"]
+- menu<<["View Requests for Sign",    "sign"]
+%p
+  Please choose:
+  %ul
+    - menu.each do |line|
+      - if @methods.include?(line[1])
+        %li= link_to(line[0], :action => line[1])
+

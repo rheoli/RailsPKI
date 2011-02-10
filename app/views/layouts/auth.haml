@@ -1,0 +1,23 @@
+!!! 1.1
+%html
+  %head
+    %title RailsPKI
+    %meta{'http-equiv'=>"content-type", :ontent=>"text/html; charset=iso-8859-1"}/
+    %meta{:name=>"description", :content=>"RailsPKI - PKI Implemented in Ruby on Rails"}/
+    %meta{:name=>"keywords", :content=>"pki,rails,railspki,ruby"}/
+    = stylesheet_link_tag "red", :media => "screen,projection"
+%body
+  %div#container
+    %div#header
+      %h1= RailsPKI::Config[:name]
+      %h2 Auth
+    %div#navigation
+      %ul
+        - if !session[:user]
+          %li.selected= link_to("Login", :action=>'login')
+    %div#content
+      = @content_for_layout
+      %p &nbsp
+    %div#footer
+      %p &copy; 2005-07 <a href="#">Stephan Toggweiler</a> | Design by <a href="http://andreasviklund.com">Andreas Viklund</a>
+

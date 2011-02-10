@@ -1,0 +1,17 @@
+<h2>Delete RA Server '<%= @db_view.name %>'</h2>
+
+<%= start_form_tag :action => 'delete_ra_server', :id => @db_view.id %>
+<table border="1">
+	<tr>
+		<td valign="top">Name</td>
+		<td><%= @db_view.name %></td>
+	</tr>
+	<tr>
+		<td valign="top">Certificate</td>
+		<td><%= (@db_view.ca_item.dn["CN"] if @db_view.ca_item_id>0) or "Local" %></td>
+	</tr>
+</table>
+<br/>
+<%= submit_tag "Delete" %>
+<%= end_form_tag %>
+</p>

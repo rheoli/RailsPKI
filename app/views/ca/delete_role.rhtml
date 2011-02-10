@@ -1,0 +1,27 @@
+<h2>Delete Role</h2>
+
+<%= start_form_tag :action => 'delete_role', :id => @db_view.id %>
+<table border="1">
+ <tr>
+  <td valign="top">Role</td>
+  <td>
+   <%= @db_view.name %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">Certificate</td>
+  <td>
+   <%= (@db_view.ca_domain.name if !@db_view.ca_domain_id.nil? and @db_view.ca_domain_id>0) or "Local" %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">RA Server</td>
+  <td>
+   <%= (@db_view.ra_server.name if !@db_view.ra_server_id.nil? and @db_view.ra_server_id>0) or "-local-" %>
+  </td>
+ </tr>
+</table>
+<%= submit_tag "Delete" %>
+<%= end_form_tag %>
+<br/>
+</p>

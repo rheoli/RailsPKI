@@ -1,0 +1,34 @@
+<h2>View User '<%= @db_view.username %>'</h2>
+
+<table border="1">
+ <tr>
+  <td valign="top">User</td>
+  <td>
+   <%= @db_view.username %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">E-Mail</td>
+  <td>
+   <%= @db_view.email %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">E-Mail CC</td>
+  <td>
+   <%= @db_view.email_cc %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">Roles</td>
+  <td>
+   <ul>
+   <% @db_view.roles.each do |role| -%>
+    <li><%= role.to_name %></li>
+   <% end -%>
+   </ul>
+  </td>
+ </tr>
+</table>
+<br/>
+</p>

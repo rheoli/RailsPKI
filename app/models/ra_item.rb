@@ -24,16 +24,51 @@
 require 'openssl'
 
 class RaItem < ActiveRecord::Base
-  belongs_to :ca_definition
+  acts_as_state_machine :initial => :request
   
+  belongs_to :ca_domain
+  has_one    :ra_revoke
+  belongs_to :supersede_item, :class_name=>"RaItem", :foreign_key=>"supersede_item_id"
+  has_one    :superseded_by, :class_name=>"RaItem", :foreign_key=>"supersede_item_id"
   serialize :dn
 
-  validates_presence_of :csr, :ca_definition_id
+  validates_presence_of :csr, :ca_domain_id
 
-  STATE_REQUEST      ="request"
-  STATE_READY_TO_SIGN="ready_to_sign"
-  STATE_IN_SIGNING   ="in_signing_process"
-  STATE_SIGNED       ="signed"
+  state :request
+  state :ready_to_sign
+  state :sign_approved
+  state :in_signing_process
+  state :signed
+
+  event :ready_to_sign do
+    transitions :to => :ready_to_sign,    :from => :request
+  end
+
+  event :approved do
+    transitions :to => :sign_approved,    :from => :ready_to_sign
+  end
+
+  event :in_signing_process do
+    transitions :to => :in_signing_process,    :from => :sign_approved
+  end
+
+  event :signed do
+    transitions :to => :signed,           :from => :in_signing_process
+  end
+
+  def self.update_yaml_ra_item(_ca_item)
+    ca_item=YAML.load(_ca_item)
+    ra_item=RaItem.find(ca_item[:id])
+    return(nil) if ra_item==nil
+    ra_item.dn        =ca_item[:dn]
+    ra_item.crt_serial=ca_item[:crt_serial]
+    ra_item.crt_begin =ca_item[:crt_begin]
+    ra_item.crt_end   =ca_item[:crt_end]
+    ra_item.crt_pem   =ca_item[:crt_pem]
+    return(nil) if !ra_item.save
+    ra_item.signed!
+    return(ra_item)
+  end
 
   def self.update_ra_item(_ca_item)
     return(nil) if _ca_item.class!=CaItem
@@ -44,13 +79,21 @@ class RaItem < ActiveRecord::Base
     ra_item.crt_begin =_ca_item.crt_begin
     ra_item.crt_end   =_ca_item.crt_end
     ra_item.crt_pem   =_ca_item.crt_pem
-    ra_item.state     =RaItem::STATE_SIGNED
     return(nil) if !ra_item.save
+    ra_item.signed!
     return(ra_item)
+  end
+
+  def approve_for_sign(_user_id, _duration=365)
+    self.approved!
+    self.signer_user_id=_user_id
+    self.duration=_duration
+    self.save
   end
 
   def method_missing(symbol, *params)
     if(symbol.to_s =~ /^subject_([A-Za-z]+)$/)
+      return('') if self.dn.nil?
       return(self.dn[$1])
     end
     super
@@ -58,7 +101,7 @@ class RaItem < ActiveRecord::Base
 
  protected
   def validate
-    if csr != "" and state==RaItem::STATE_REQUEST then
+    if csr != "" and self.state.nil? then
       check_csr=nil
       spki=nil
       begin
@@ -85,9 +128,9 @@ class RaItem < ActiveRecord::Base
           return
         end
       end
-      ca_def=CaDefinition.find(ca_definition_id) if ca_definition_id!=nil
-      if ca_def==nil
-        errors.add("ca_definition_id", "CA not found")
+      ca_domain=CaDomain.find(ca_domain_id) if ca_domain_id!=nil
+      if ca_domain==nil
+        errors.add("ca_domain_id", "CA not found")
         return
       end
       self.dn={}
@@ -97,14 +140,13 @@ class RaItem < ActiveRecord::Base
           req_dn[s[0]]=s[1] if s[1]!="-dummy-"
         end
       end  
-      sort_as=ca_def.dn_policy["sort_as"]
-      sort_as=ca_def.dn_policy["sort_as_sign"] if ca_def.dn_policy.has_key?("sort_as_sign")
-      sort_as.each do |c|
+      ca_domain.dn_sort_for_sign.each do |c|
         self.dn[c]=req_dn[c]
-        if ca_def.dn_policy["dn_info"][c][0][0]=="match"
-          self.dn[c]=ca_def.dn[c]
+        if ca_domain.dn_policy["dn_info"][c][0][0]=="match"
+          self.dn[c]=ca_domain.dn[c]
         end
       end
     end
   end
+  
 end

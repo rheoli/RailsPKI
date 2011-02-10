@@ -1,52 +1,15 @@
 <h2>Generate request</h2>
 
-<%= error_messages_for("ra_req") %>
-
-<%= start_form_tag :action => 'genreq' %>
-
-<TABLE BORDER="0">
- <% @ca_def.dn_policy["sort_as"].each do |c| %>
- <TR>
-  <TD ALIGN="LEFT"><%= c %></TD>
-  <TD ALIGN="LEFT">
-   <% if @ca_def.dn_policy["dn_info"][c][0][0]=="match" -%>
-    <%= @ca_def.dn[c] %>
-   <% else -%>
-    <%= text_field("ra_req", c, "size"=>"40") %>
-   <% end -%>
-  </TD>
- </TR>
- <% end %>
- <TR>
-  <TD>&nbsp;</TD><TD></TD>
- </TR>
- <TR>
-  <TD ALIGN="LEFT">Bits</TD>
-  <TD ALIGN="LEFT">
-   <%=
-    options = [["Select one", ""]] + RaReqgen::BIT_TYPES
-    select("ra_req", "bits", options)
-   %>
-  </TD>
- </TR>
- <TR>
-  <TD>&nbsp;</TD><TD></TD>
- </TR>
- <TR>
- <TR>
-  <TD ALIGN="LEFT">Password</TD>
-  <TD ALIGN="LEFT">
-   <%= password_field("ra_req", "password", "size"=>"40")%>
-  </TD>
- </TR>
- <TR>
-  <TD ALIGN="LEFT">Password (again)</TD>
-  <TD ALIGN="LEFT">
-   <%= password_field("ra_req", "password_confirmation", "size"=>"40")%>
-  </TD>
- </TR>
-</TABLE>
-<p/>
-<p><%= submit_tag "Create" %></p>
-<%= end_form_tag %>
+ <p>
+	Private Key:<br/>
+	<pre><%= @sPKey %></pre>
+ </p>
+ <p>
+	Request:<br/>
+	<pre><%= @sReqPEM %></pre>
+ </p>
+ <p>
+	Request in Text:<br/>
+	<pre><%= @sReqText %></pre>
+ </p>
 

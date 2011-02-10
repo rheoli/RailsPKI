@@ -22,10 +22,32 @@
 #++
 
 class RaController < ApplicationController
-
   layout "ra"
+  
+  before_filter :authorize_ra
 
-  before_filter :authorize
+  protected
+
+   ROLES_METH={
+     Role::ROLE_RA_CERT_MGR  => ["index", "cert_view", "server_request", "genreq", "sign", "ca_view", "cert_revoke","cert_renew","cert_reissue"],
+     Role::ROLE_RA_APPLICANT => ["index", "cert_view", "server_request", "genreq", "ca_view", "cert_revoke","cert_renew","cert_reissue"],
+   }
+
+   def authorize_ra
+     redirect_to_access_denied("not authorized") if !authorize
+     redirect_to_access_denied("no role defined") and return if current_role.nil?
+     if !ROLES_METH[current_role.name].nil? and current_role.ca_domain.class==CaDomain
+       ca_yaml=YAML.load(current_role.ca_domain.yaml)
+       if ca_yaml["extensions"]["sign"]["extendedKeyUsage"]=~/emailProtection/ or
+           ca_yaml["extensions"]["sign"]["extendedKeyUsage"]=~/clientAuth/
+         ROLES_METH[current_role.name]<<"client_request"
+       end
+       return if ROLES_METH[current_role.name].include?(action_name)
+     end
+     redirect_to_access_denied("not enough privileges")
+   end
+
+  public
 
   def server_request
     _certificate_request("server_request")
@@ -35,13 +57,165 @@ class RaController < ApplicationController
     _certificate_request("client_request")
   end
 
+  def ca_view
+    @ca_domain=CaDomain.find_by_id(params[:id])
+    if @ca_domain.nil?
+      redirect_to :action => 'cert_view', :id => nil
+    else
+      if !params[:type].nil? and params[:type]=="pem"
+        render(:template=>"ra/ca_view_pem.rhtml")
+      elsif !params[:type].nil? and params[:type]=="text"
+        render(:template=>"ra/ca_view_text.rhtml")
+      end
+    end
+  end
+
+  def cert_view
+    if params[:id]!=nil then
+      current_ra_item do
+        @ra_item=RaItem.find(params[:id])
+      end
+      if @ra_item==nil
+        redirect_to :action => 'cert_view', :id => nil
+        return
+      end
+      if @ra_item.crt_pem!=nil
+          render(:template=>"ra/cert_view_item_cert.haml")
+        end
+        #o=RaMailer.create_check("railspki@rheoli.net", "empf", {})
+        #o.set_content_type("text/html")
+        #RaMailer.deliver(o)
+      else
+        render(:template=>"ra/cert_view_item_req.rhtml")
+      end
+    else
+      current_ra_item do
+        #@ra_items=RaItem.find(:all, :conditions=>["crt_end > datetime('now','localtime')"])
+        @ra_items=RaItem.find(:all)
+      end
+    end
+  end
+
+  def cert_revoke
+    _cert_recmd("revoke")
+  end
+  
+  def cert_renew
+    _cert_recmd("renew")
+  end
+  
+  def cert_reissue
+    _cert_recmd("reissue")
+  end
+
+  def _cert_recmd(_cmd)
+    if params[:id].nil? then
+      redirect_to :action => 'cert_view'
+      return
+    end
+    current_ra_item do
+      @ra_item=RaItem.find_by_id(params[:id])
+    end
+    if @ra_item==nil
+      redirect_to :action => 'cert_view', :id => nil
+      return
+    end
+    if @ra_item.crt_pem.nil?
+      redirect_to :action => 'cert_view', :id => nil
+      return
+    end
+    if @ra_item.ca_domain_id != current_role.ca_domain_id
+      redirect_to :action => 'cert_view', :id => nil
+      return
+    end
+    if current_role.name==Role::ROLE_RA_CERT_MGR or (current_role.name==Role::ROLE_RA_APPLICANT and @ra_item.user_id==current_user.id)
+      if request.post?
+        r=RaRevoke.new
+        r.ra_item_id=@ra_item.id
+        r.user_id=current_user.id
+        r.reason=params[:reason] if _cmd=="revoke"
+        r.reason=RaRevoke::REASONS["superseded"]  if _cmd=="renew"
+        r.reason=RaRevoke::REASONS["keyCompromise"]  if _cmd=="reissue"
+        r.save
+        if _cmd=="renew" or _cmd=="reissue"
+          r=RaItem.new
+          r.ca_domain_id=@ra_item.ca_domain_id
+          r.dn=@ra_item.dn
+          r.csr=@ra_item.csr if _cmd=="renew"
+          r.csr=params[:csr] if _cmd=="reissue"
+          r.supersede_item=@ra_item
+          r.user_id=current_user.id
+          r.save
+          r.dn=@ra_item.dn
+          r.save
+          r.ready_to_sign!
+        end
+        redirect_to :action => 'cert_view', :id => nil
+        return
+      end
+    end
+  end
+
+  def index
+    @methods=ROLES_METH[current_role.name]
+  end
+
+  def genreq
+    template="ra/genreq_step1.rhtml"
+    @ra_req=RaReqgen.new
+    @ca_domain=current_role.ca_domain
+    if request.post?
+      @ra_req.add_params(@ca_domain.id, params[:ra_req])
+      if @ra_req.valid?
+        @sPKey, @sReqPEM, @sReqText = @ra_req.gen_request
+        template="ra/genreq_step2.rhtml"
+      end
+    end
+    render(:template=>template)
+  end
+  
+  def sign
+    @ra_item=nil
+    if params[:id]!=nil
+      current_ra_item do
+        @ra_item=RaItem.find_by_id(params[:id])
+      end
+      if @ra_item==nil
+        redirect_to :action => 'sign', :id => nil
+        return
+      end
+      if request.post?
+        duration=365
+        duration_i=params[:ra_item][:duration].to_i
+        if duration_i>1 and duration_i<4
+          duration=duration_i*366
+        end
+        if @ra_item.approve_for_sign(@current_user.id, duration)
+          redirect_to :action => 'cert_view', :id => params[:id]
+        end
+      else
+        render(:template=>"ra/sign_item.rhtml")
+      end
+    else
+      @ra_items=RaItem.find_in_state(:all, :ready_to_sign)
+    end
+  end
+  
+ private
+  
   def _certificate_request(_type)
-    @ca_defs_all=CaDefinition.find_all
+    @ca_domains=current_role.ca_domain
     if request.get?
-      @ra_item=RaItem.find(params[:id]) if params[:id]!=nil
+      if params[:id]!=nil
+        current_ra_item do
+          @ra_item=RaItem.find_by_id(params[:id])
+        end
+      end
       if @ra_item==nil
         #-Step 1 Request
-        @ra_item    =RaItem.new
+        current_ra_item do
+          @ra_item=RaItem.new
+        end
         if params[:browser]!="ie" and params[:browser]!="moz"
           render(:template=>"ra/#{_type}_step1.rhtml")
         else
@@ -52,85 +226,42 @@ class RaController < ApplicationController
         end
       else
         #-Step 2 Request
+        p @ra_item
         render(:template=>"ra/#{_type}_step2.rhtml")
       end
     else
       #-Step 1 Response
       if params[:id]==nil
-        @ra_item        =RaItem.new(params[:ra_item])
+        current_ra_item do
+          @ra_item=RaItem.create(params[:ra_item])
+        end
+        #-To Test: @ra_item.ca_domain_id=@ca_domains.id if @ca_domains.class==CaDomain
         if params[:csr]!=nil
           @ra_item.csr="-----BEGIN CERTIFICATE REQUEST-----\n"
           @ra_item.csr<<params[:csr].gsub(/\\r/, '').gsub(/\\n/,'\n')
           @ra_item.csr<<"-----END CERTIFICATE REQUEST-----\n"
           p @ra_item.csr
         end
-        @ra_item.state  =RaItem::STATE_REQUEST
-        @ra_item.user_id=session[:user_id]
+        #-with_scope: @ra_item.user_id=session[:user]
         if @ra_item.save
           redirect_to :action => _type, :id => @ra_item.id
           return
         end
         render(:template=>"ra/#{_type}_step1.rhtml")
       else
-        @ra_item=RaItem.find(params[:id])
+        current_ra_item do
+          @ra_item=RaItem.find(params[:id])
+        end
         params[:ra_item].each do |k, v|
           if k =~ /^subject_([A-Za-z]+)$/
-            @ra_item.dn[$1]=v if @ra_item.dn.has_key?($1) and @ra_item.ca_definition.dn_policy["dn_info"][$1][0][0]!="match"
+            @ra_item.dn[$1]=v if @ra_item.dn.has_key?($1) and @ra_item.ca_domain.dn_policy["dn_info"][$1][0][0]!="match"
           end
         end
-        @ra_item.state=RaItem::STATE_READY_TO_SIGN
         @ra_item.save
+        @ra_item.ready_to_sign!
         redirect_to :action => 'cert_view', :id => params[:id]
       end
     end 
-  end
-
-  def cert_view
-    if params[:id]!=nil then
-      @ra_item=RaItem.find(params[:id])
-      if @ra_item==nil
-        redirect_to :action => 'cert_view', :id => nil
-        return
-      end
-      if @ra_item.crt_pem!=nil
-        render(:template=>"ra/cert_view_item_cert.rhtml")
-      else
-        render(:template=>"ra/cert_view_item_req.rhtml")
-      end
-    else
-      @ra_items=RaItem.find_all
-    end
-  end
-
-  def index
-  end
-
-  def genreq
-    if params[:ca_id]!=nil and params[:ca_id].to_i>0
-      redirect_to :action => 'genreq', :id => params[:ca_id]
-      return
-    end
-    if params[:id]!=nil then
-      @ca_def=CaDefinition.find(params[:id])
-      if @ca_def==nil
-        redirect_to :action => 'genreq', :id => nil
-        return
-      end
-      if request.post?
-        @ra_req = RaReqgen.new
-        @ra_req.add_params(params[:id], params[:ra_req])
-        if @ra_req.valid?
-          @sPKey, @sReqPEM, @sReqText = @ra_req.gen_request
-          render(:template=>"ra/genreq_step3.rhtml")
-        end
-      else
-        render(:template=>"ra/genreq_step2.rhtml")
-      end
-    else
-      @ra_req = RaReqgen.new
-      @ca_defs_all=CaDefinition.find_all
-      render(:template=>"ra/genreq_step1.rhtml")
-    end
   end
 
 end

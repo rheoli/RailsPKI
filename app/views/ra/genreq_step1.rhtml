@@ -5,19 +5,48 @@
 <%= start_form_tag :action => 'genreq' %>
 
 <TABLE BORDER="0">
+ <% @ca_domain.dn_sort_for_sign.each do |c| %>
+ <TR>
+  <TD ALIGN="LEFT"><%= c %></TD>
+  <TD ALIGN="LEFT">
+   <% if @ca_domain.dn_policy["dn_info"][c][0][0]=="match" -%>
+    <%= @ca_domain.dn[c] %>
+   <% else -%>
+    <%= text_field("ra_req", c, "size"=>"40") %>
+   <% end -%>
+  </TD>
  </TR>
- <TD ALIGN="LEFT">Sign CA</TD>
- <TD ALIGN="LEFT">
-  <select name="ca_id">
-   <option value="">Select one</option>
-   <% @ca_defs_all.each do |c| %>
-	<option value="<%= c.id %>"><%= c.name %></option>
-   <% end %>
-  </select>
- </TD>
+ <% end %>
+ <TR>
+  <TD>&nbsp;</TD><TD></TD>
+ </TR>
+ <TR>
+  <TD ALIGN="LEFT">Bits</TD>
+  <TD ALIGN="LEFT">
+   <%=
+    options = [["Select one", ""]] + RaReqgen::BIT_TYPES
+    select("ra_req", "bits", options)
+   %>
+  </TD>
+ </TR>
+ <TR>
+  <TD>&nbsp;</TD><TD></TD>
+ </TR>
+ <TR>
+ <TR>
+  <TD ALIGN="LEFT">Password</TD>
+  <TD ALIGN="LEFT">
+   <%= password_field("ra_req", "password", "size"=>"40")%>
+  </TD>
+ </TR>
+ <TR>
+  <TD ALIGN="LEFT">Password (again)</TD>
+  <TD ALIGN="LEFT">
+   <%= password_field("ra_req", "password_confirmation", "size"=>"40")%>
+  </TD>
  </TR>
 </TABLE>
 <p/>
-<p><%= submit_tag "Next Step" %></p>
+<p><%= submit_tag "Create" %></p>
 <%= end_form_tag %>
 
