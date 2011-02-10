@@ -36,6 +36,15 @@ class CaItem < ActiveRecord::Base
   STATE_SIGNED       ="signed"
   STATE_RA_SYNCED    ="ra_synced"
 
+  def to_s
+    s=""
+    self.dn.each do |name, val|
+      s<<"/" if s!=""
+      s<<"#{name}=#{val}"
+    end
+    return(s)
+  end
+
   def self.create_from_ra_item(_ra_server_id, _ra_item)
     return(nil) if _ra_item.class!=RaItem
     ca_item=CaItem.find(:first, :conditions=>["ra_item_id=? and ra_server_id=?", _ra_item.id, _ra_server_id])
@@ -45,6 +54,7 @@ class CaItem < ActiveRecord::Base
     ca_item.csr=_ra_item.csr
     ca_item.state=_ra_item.state
     ca_item.ca_domain_id=_ra_item.ca_domain_id
+    ca_item.duration=_ra_item.duration
     ca_item.ra_item_id=_ra_item.id
     ca_item.ra_server_id=_ra_server_id 
     return(nil) if !ca_item.save
@@ -71,7 +81,7 @@ class CaItem < ActiveRecord::Base
         raise "Can't identify request certificate"
       end
     end  
-    s_cert=ca_domain.sign(s_csr, nil, dn)
+    s_cert=ca_domain.sign(s_csr, (self.duration*3600*24), dn)
     self.crt_pem   =s_cert.to_pem
     self.crt_serial=s_cert.serial.to_i
     self.crt_begin =s_cert.not_before

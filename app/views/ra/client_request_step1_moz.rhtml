@@ -5,15 +5,19 @@
     <%= start_form_tag :action => 'client_request' %>
     
     <table border="0">
-      <td align="left">Select Signing CA</td>
+      <td align="left"><%= "Select " if @ca_domains.class==Array %>Signing CA</td>
       <td align="left">
+      <% if @ca_domains.class==CaDomain -%>
+       <b><%= @ca_domains.name %></b>
+      <% else -%>
        <%=
-        options = [["Select one", ""]]
-        @ca_domains.each do |c|
-          options << [c.name, c.id]
-        end
-        select("ra_item", "ca_domain_id", options)
+         options = [["Select one", ""]]
+         @ca_domains.each do |c|
+           options << [c.name, c.id]
+         end
+         select("ra_item", "ca_domain_id", options)
        %>
+      <% end -%>
       </td>
      </tr>
      <tr>

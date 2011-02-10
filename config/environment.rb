@@ -51,3 +51,18 @@ end
 # end
 
 # Include your application configuration below
+
+#-Code from mailr
+default_config_path = 'config/railspki_default'
+default_config = File.join(RAILS_ROOT, default_config_path)
+require default_config
+begin
+  require File.join(RAILS_ROOT, 'config/railspki_site')
+  RailsPKI::Config.update(RailsPKI::LocalConfig) if RailsPKI::LocalConfig
+rescue LoadError
+  STDERR.puts 'WARNING: config/railspki_site.rb not found, using default settings from ' + default_config_path
+end
+#-EoCfM
+
+ActionWebService::API::Base.allow_active_record_expects=true
+

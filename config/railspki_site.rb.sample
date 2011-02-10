@@ -1,0 +1,6 @@
+module RailsPKI                                                                      
+  LocalConfig = {
+    :type             => 'CA',
+    :name             => 'RailsPKI CA',
+  }
+end

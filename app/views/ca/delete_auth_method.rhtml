@@ -1,0 +1,35 @@
+<h2>Delete AuthMethod '<%= @db_view.name %>'</h2>
+
+<%= start_form_tag :action => 'delete_auth_method', :id => @db_view.id %>
+<table border="1">
+ <tr>
+  <td valign="top">Name</td>
+  <td>
+   <%= @db_view.name %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">Method</td>
+  <td>
+   <ul>
+    <li>Type: <%= @db_view.meth[:type] %></li>
+    <li>Check: <%= @db_view.meth[:check] %></li>
+   </ul>
+   <%= @db_view.meth.to_yaml %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">Roles</td>
+  <td>
+   <ul>
+   <% @db_view.roles.each do |role| -%>
+    <li><%= role.to_name %></li>
+   <% end -%>
+   </ul>
+  </td>
+ </tr>
+</table>
+<%= submit_tag "Delete" %>
+<%= end_form_tag %>
+<br/>
+</p>

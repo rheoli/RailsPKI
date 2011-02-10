@@ -1,0 +1,19 @@
+<h2>View Roles</h2>
+<p>
+ <table border="1" cellspacing="0">
+  <tr><td><b>Name</b></td><td><b>CaDomain</td><td><b>RaServer</b></td><td><b>Cmd</b></td></tr>
+  <% @db_views.each do |ras| %>
+  <tr>
+    <td><%= link_to(ras.name, :action => "view_role", :id => ras.id) %></td>
+    <td><%= (ras.ca_domain.name if !ras.ca_domain_id.nil? and ras.ca_domain_id>0) or "Local" %></td>
+    <td><%= (ras.ra_server.name if !ras.ra_server_id.nil? and ras.ra_server_id>0) or "Local" %></td>
+    <td>
+     <%= link_to("Edit", :action => "edit_role", :id => ras.id) %>
+     <%= link_to("Delete", :action => "delete_role", :id => ras.id) %>
+    </td>
+  </tr>
+  <% end %>
+ </table>
+<br/>
+	<%= link_to("Add new Role", :action=>"edit_role", :id=>nil) %>
+</p>

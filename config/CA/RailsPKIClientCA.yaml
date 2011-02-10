@@ -1,6 +1,7 @@
 #=CA Definitions
 
 name: Rails PKI Client CA
+duration: 2
 bits: 2048
 dn:
  C: CH

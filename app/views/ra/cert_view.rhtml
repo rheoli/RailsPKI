@@ -1,21 +1,29 @@
 <h2>View Request/Certificate</h2>
 <p>
- <table border="1" cellspacing="0">
-  <tr><td><b>CN</b></td><td><b>State</td></tr>
-  <% @ra_items.each do |c| %>
+ <table border="1" cellspacing="0" width="700">
   <tr>
-    <td><%= link_to("#{c.dn} (#{c.ca_domain.name})", :action => "cert_view", :id => c.id) %></td>
-    <td>
-	 <%= c.state %>
-	</td>
-	<td>
-	 <% if c.ra_revoke.nil? -%>
-	  <%= link_to("Revoke", :action => "cert_revoke", :id => c.id) %>
-	 <% else -%>
-	 Revoked on <%= c.ra_revoke.created_on %> with reason <%= RaRevoke::REASONS[c.ra_revoke.reason] %>
-	 <% end -%>
-	</td>
+   <td><b>CN</b></td><td><b>State</b></td><td><b>Expiry</b></td>
   </tr>
-  <% end %>
+  <% now=Time.now -%>
+  <% @ra_items.each do |c| -%>
+  <%
+    color="#FFC57F"
+    color="#62C46F" if c.state=="signed"
+    color="#FF857F" if !c.ra_revoke.nil?
+  -%>
+  <tr bgcolor="<%= color %>">
+    <td><%= link_to("#{c.dn["CN"]} (#{c.ca_domain.name})", :action => "cert_view", :id => c.id) %></td>
+    <td>
+     <% if !c.ra_revoke.nil? -%>
+      revoked
+     <% else -%>
+      <%= c.state %>
+     <% end -%>
+	</td>
+        <td>
+         <%= (c.crt_end-now).to_i/3600/24 %> day(s)
+        </td>
+  </tr>
+  <% end -%>
  </table>
 </p>

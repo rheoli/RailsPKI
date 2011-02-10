@@ -26,9 +26,22 @@ class Role < ActiveRecord::Base
   has_and_belongs_to_many :auth_methods
   
   belongs_to :ca_domain
+  belongs_to :ra_server
+
+  validates_presence_of :name
+  validates_presence_of :ca_domain_id
+  validates_presence_of :ra_server_id
   
   ROLE_CA_ADMIN="ca_admin"
   ROLE_CA_CERT_MGR="ca_cert_mgr"
   ROLE_RA_CERT_MGR="ra_cert_mgr"
   ROLE_RA_APPLICANT="ra_applicant"
+
+  def to_name
+    ca_domain="Local"
+    ca_domain=self.ca_domain.name if !self.ca_domain.nil?
+    ra_server="-local-"
+    ra_server=self.ra_server.name if !self.ra_server.nil?
+    "#{self.name}(#{ca_domain}/#{ra_server})"
+  end
 end

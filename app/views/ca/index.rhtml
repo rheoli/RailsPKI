@@ -1,12 +1,13 @@
 <p>
  Please choose:
  <ul>
-  <li><%= link_to("View Requests for Sign", :action => "sign_approved") %></li>
-  <li><%= link_to("View Signed Certificates", :action => "cert_view") %></li>
-  <li><%= link_to("View CAs", :action => "ca_domain_list") %></li>
-  <li><%= link_to("Add new CA", :action => "ca_domain_add") %></li>
-  <li><%= link_to("Get New Requests from RAs", :action => "request_get") %></li>
-  <li><%= link_to("Put signed Requests to RAs", :action => "request_put") %></li>
+  <li><%= link_to("View Requests for Sign", :action => "view_ca_item") %></li>
+  <li><%= link_to("View Signed Certificates", :action => "view_ca_item") %></li>
+  <li><%= link_to("View CAs", :action => "view_ca_domain") %></li>
+  <li><%= link_to("View RA Server", :action => "view_ra_server") %></li>
+  <li><%= link_to("View Roles", :action => "view_role") %></li>
+  <li><%= link_to("View Users", :action => "view_user") %></li>
+  <li><%= link_to("View Authmethods", :action => "view_auth_method") %></li>
  </ul>
  <!-- ><table border="1" cellpadding="0" cellspacing="0">
   <% request.env.each do |key,val| -%>

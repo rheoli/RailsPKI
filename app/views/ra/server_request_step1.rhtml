@@ -4,20 +4,24 @@
 
     <%= start_form_tag :action => 'server_request' %>
     
-    <table border="0">
-      <td align="left">Select Signing CA</td>
+    <table border="0" width="700" cellpadding="5" cellspacing="0">
+      <td align="left"><%= "Select" if @ca_domains.class==Array %> Signing CA</td>
       <td align="left">
+      <% if @ca_domains.class==CaDomain -%>
+       <b><%= @ca_domains.name %></b>
+      <% else -%>
        <%=
-        options = [["Select one", ""]]
-        @ca_domains.each do |c|
-          options << [c.name, c.id]
-        end
-        select("ra_item", "ca_domain_id", options)
+         options = [["Select one", ""]]
+         @ca_domains.each do |c|
+           options << [c.name, c.id]
+         end
+         select("ra_item", "ca_domain_id", options)
        %>
+      <% end -%>
       </td>
      </tr>
      <tr>
-      <td align="left">Request</td>
+      <td align="left" valign="top">Request</td>
       <td align="left">
        <%= text_area("ra_item", "csr", "cols" => "70", "rows" => "20")%>
       </td>

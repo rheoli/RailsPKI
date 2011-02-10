@@ -32,6 +32,8 @@ class CaDomain < ActiveRecord::Base
   
   belongs_to :ca_domain
   has_many   :ca_domains
+  has_many   :ca_items
+  has_many   :ra_items
   
   validates_presence_of :yaml, :ca_domain_id
 
@@ -69,7 +71,7 @@ class CaDomain < ActiveRecord::Base
     return(self.dn_policy["sort_as"])
   end
   
-  def sign(_req, _duration=nil, _subject=nil)
+  def sign(_req, _duration=nil, _subject=nil, _extensions=nil)
     if _req.class!=OpenSSL::X509::Request and _req.class!=OpenSSL::Netscape::SPKI
       raise "wrong request type"
     end
@@ -136,9 +138,16 @@ class CaDomain < ActiveRecord::Base
         end
       end
     end
+    if _extensions!=nil
+      _extensions.each do |id, data|
+        s_exts[id]=data
+      end
+    end
     is_subca_cert=false
     s_exts.each do |id, data|
-      next if data[0]==nil
+p id
+p data
+      next if data[0]==nil or data[0]==""
       critical=data[0]
       value=data[1]
       value="email:#{req_subject["emailAddress"]}" if value=="email"
@@ -170,6 +179,30 @@ class CaDomain < ActiveRecord::Base
   end
 
  protected
+  def validate
+    if !self.id.nil?
+      self.pubkey_pem="" if self.pubkey_pem.nil?
+      self.privkey_pem="" if self.privkey_pem.nil?
+      if self.pubkey_pem==""
+        errors.add("pubkey_pem", "can't be null")
+      end
+      if self.privkey_pem==""
+        errors.add("privkey_pem", "can't be null")
+      end
+    end
+  end
+
+  def is_ca?
+    is_ca=false
+    begin
+      if self.extensions["default"]["basicConstraints"][1]=="CA:TRUE"
+        is_ca=true
+      end
+    rescue
+    end
+    is_ca
+  end
+ 
   def after_validation_on_create
     ca_yaml=YAML.load(self.yaml)
     self.name=ca_yaml["name"]
@@ -193,10 +226,16 @@ class CaDomain < ActiveRecord::Base
     ca_req.public_key=privkey.public_key
     ca_req.sign(privkey, OpenSSL::Digest::SHA1.new)
     sign_ca=CaDomain.find(ca_domain_id) if ca_domain_id>0
+    duration=ca_yaml["duration"]
+    if !duration.nil?
+      duration*=(3600*24*365)
+    end
     if sign_ca==nil then
-      pubkey=sign(ca_req)
+      pubkey=sign(ca_req, duration)
     else
-      pubkey=sign_ca.sign(ca_req)
+      exts=nil
+      exts=self.extensions["default"] if is_ca?
+      pubkey=sign_ca.sign(ca_req, duration, nil, exts)
     end
     self.pubkey_pem=pubkey.to_pem
     self.privkey_pem=privkey.to_pem

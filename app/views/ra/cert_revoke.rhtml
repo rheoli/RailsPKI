@@ -1,22 +1,55 @@
 <h2>Revoke Certificate</h2>
 <p>
-<%= @ra_item.dn %> (<%= @ra_item.ca_domain.name %>)
-</p>
-<p>
-<pre><%= @ra_item.crt_pem %></pre>
-<pre><%= OpenSSL::X509::Certificate.new(@ra_item.crt_pem).to_text %></pre>
+<table border="1" cellpadding="1" cellspacing="0">
+ <% @ra_item.dn.each do |key, val| -%>
+ <tr>
+  <td><%= key %></td><td><%= val %></td>
+ </tr>
+ <% end -%>
+ <tr>
+  <%
+   ca_path=[]
+   ca=@ra_item.ca_domain
+   while !ca.nil?
+     ca_path<<ca
+     ca=ca.ca_domain
+   end
+   ca_max=ca_path.size
+  -%>
+  <td valign="top">Signer Path</td>
+  <td>
+   <table border="0">
+   <%
+     ca_count=0
+     ca_path.reverse.each do |ca|
+   -%>
+    <tr>
+     <% 0.upto(ca_count-1) do |c| -%>
+       <td>&nbsp;&nbsp;</td>
+     <% end -%>
+     <td colspan="<%= ca_max-ca_count %>">
+      <%= ca.name %>
+     </td>
+    </tr>
+   <%    
+      ca_count+=1
+     end
+   -%>
+   </table>
+  </td>
+ </tr>
+</table>
 </p>
 <p>
 <%= start_form_tag :action => 'cert_revoke' %>
 Please choose reason:
-	<%=
+        <%=
    options = "<option value=\"\">Select one</option>"
-   RaRevoke::RASONS.each do |key, val|
-	options << "<option value=\"#{key}\">#{val}</option>"
+   RaRevoke::REASONS.each do |key, val|
+        options << "<option value=\"#{key}\">#{val}</option>"
    end
    select_tag :reason, options
 %>
 <%= submit_tag "Revoke" %>
 <%= end_form_tag %>
 </p>
-

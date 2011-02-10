@@ -1,0 +1,17 @@
+<h2>View AuthMethods</h2>
+<p>
+ <table border="1" cellspacing="0">
+  <tr><td><b>Name</b></td><td><b>Cmd</b></td></tr>
+  <% @db_views.each do |ras| %>
+  <tr>
+    <td><%= link_to(ras.name, :action => "view_auth_method", :id => ras.id) %></td>
+    <td>
+     <%= link_to("Edit", :action => "edit_auth_method", :id => ras.id) %>
+     <%= link_to("Delete", :action => "delete_auth_method", :id => ras.id) %>
+    </td>
+  </tr>
+  <% end %>
+ </table>
+<br/>
+	<%= link_to("Add new AuthMethod", :action=>"edit_auth_method", :id=>nil) %>
+</p>

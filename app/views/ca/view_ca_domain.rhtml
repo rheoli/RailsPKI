@@ -1,0 +1,21 @@
+<h2>View CA '<%= @db_view.name %>'</h2>
+<table border="1">
+	<% if @db_view.pubkey != nil -%>
+	<tr>
+		<td valign="top">Subject DN</td>
+		<td><%= @db_view.pubkey.subject.to_s  %></td>
+	</tr>
+	<tr>
+		<td valign="top">Issuer DN</td>
+		<td><%= @db_view.pubkey.issuer.to_s  %></td>
+	</tr>
+	<% end -%>
+	<tr>
+		<td valign="top">PEM</td>
+		<td><pre><%= @db_view.pubkey.to_s %></pre></td>
+	</tr>
+	<tr>
+		<td valign="top">PEM</td>
+		<td><pre><%= @db_view.pubkey.to_text %></pre></td>
+	</tr>
+</table>

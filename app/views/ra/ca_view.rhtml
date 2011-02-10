@@ -1,0 +1,48 @@
+<h2>View CA <%= @ca_domain.name %></h2>
+<p>
+<table border="1" cellpadding="1" cellspacing="0">
+ <% @ca_domain.dn.each do |key, val| -%>
+ <tr>
+  <td><%= key %></td><td><%= val %></td>
+ </tr>
+ <% end -%>
+ <tr>
+  <%
+   ca_path=[]
+   ca=@ca_domain.ca_domain
+   while !ca.nil?
+     ca_path<<ca
+     ca=ca.ca_domain
+   end
+   ca_max=ca_path.size
+  -%>
+  <td valign="top">Signer Path</td>
+  <td>
+   <table border="0">
+   <%
+     ca_count=0
+     ca_path.reverse.each do |ca|
+   -%>
+    <tr>
+     <% 0.upto(ca_count-1) do |c| -%>
+       <td>&nbsp;&nbsp;</td>
+     <% end -%>
+     <td colspan="<%= ca_max-ca_count %>">
+      <%= link_to(ca.name, :action => "ca_view", :id => ca.id) %>
+     </td>
+    </tr>
+   <%    
+      ca_count+=1
+     end
+   -%>
+   </table>
+  </td>
+ </tr>
+</table>
+</p>
+<p>
+<br/>
+<%= link_to("View PEM", :action => "ca_view", :id => @ca_domain.id, :type => "pem") %>
+<br/>
+<%= link_to("View Text", :action => "ca_view", :id => @ca_domain.id, :type => "text") %>
+</p>

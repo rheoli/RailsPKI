@@ -43,7 +43,8 @@ class RaReqgen
 
   def method_missing(symbol, *params)
     symb="#{symbol}".gsub(/:/, '')
-    if @valid_params[symb]==true
+    p symb
+    if !@valid_params.nil? and @valid_params[symb]==true
       @params[symb]
     end
   end

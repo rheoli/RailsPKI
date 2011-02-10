@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2005-06 Stephan Toggweiler
+# Copyright (c) 2006 Stephan Toggweiler
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -27,152 +27,164 @@ class CaController < ApplicationController
   before_filter :authorize_ca
 
  protected
+
+   def authorize_ca
+     return if !authorize
+
+     role=Role.find_by_id(session[:role])
+     redirect_to_access_denied("no role defined") and return if role.nil?
+
+     return if role.name==Role::ROLE_CA_ADMIN
+
+     redirect_to_access_denied("not enough privileges")
+   end
+
+ protected
  
-  def authorize_ca
-    return if !authorize
-    redirect_to_access_denied("no role defined") and return if current_role.nil?
-    return if current_role.name==Role::ROLE_CA_ADMIN
-    redirect_to_access_denied("not enough privileges")
+  def view_template(_class)
+    if !params[:id].nil?
+      @db_view = _class.find_by_id(params[:id]) || _class.new
+    else
+      @db_views=_class.find(:all)
+      return(true)
+    end
+    false
   end
- 
+
+  def view_templates(_class)
+    @db_views=_class.find(:all)
+    true
+  end
+
+  def edit_template(_class, _params)
+    @db_view = _class.find_by_id(params[:id]) || _class.new
+    if request.post?
+      attr=@db_view.attributes
+p attr
+      _params.each do |key, val|
+        attr[key]=val
+      end
+      @db_view.attributes=attr
+      return(true) if @db_view.save
+    end
+    false
+  end 
+
+  def delete_template(_class)
+    @db_view = _class.find_by_id(params[:id])
+    return(true) if @db_view.nil?
+    if request.post?
+      @db_view.destroy 
+      return(true)
+    end
+    false
+  end
+
  public
 
-# --<Admin>--
-
-  def ca_domain_add
-    if request.get?
-      @ca_domain=CaDomain.new
-      @ca_domains=CaDomain.find_all
-    else
-      if params[:ca_domain]["yaml"].class!=StringIO and params[:ca_domain]["yaml"].class!=Tempfile
-        params[:ca_domain]["yaml"]=nil
-      else
-        yaml_a=params[:ca_domain]["yaml"].to_a
-        params[:ca_domain]["yaml"]=yaml_a.to_s
-      end
-      @ca_domain = CaDomain.new(params[:ca_domain])
-      if @ca_domain.save
-        #flash[:notice] = 'Product was successfully created.'
-        redirect_to :action => 'ca_domain_list', :id => @ca_domain.id
-      end
-    end
-  end
-  
-  def ca_domain_delete
-    if params[:id] != "" then
-      @ca_domain=CaDomain.find(params[:id])
-      @ca_domain.destroy
-    end
-    redirect_to :action => 'ca_domain_list', :id => nil
+  def view_ra_server
+    render(:template=>"ca/view_ra_servers") if view_template(RaServer)
   end
 
-  def ca_domain_edit
-    if params[:id] != "" then
-      @ca_domain=CaDomain.find(params[:id])
-      return if request.get?
-      if params[:ca_domain]["pubkey_pem"]=="" or params[:ca_domain]["privkey_pem"]==""
-        @ca_domain.errors.add("pubkey_pem", "can't be null")
-        @ca_domain.errors.add("privkey_pem", "can't be null")
-        return
-      end
-      @ca_domain.pubkey_pem=params[:ca_domain]["pubkey_pem"]
-      @ca_domain.privkey_pem=params[:ca_domain]["privkey_pem"]
-      @ca_domain.save
-    end
-    redirect_to :action => 'ca_domain_list', :id => nil
+  def edit_ra_server
+    redirect_to(:action=>"view_ra_server", :id=>@db_view.id) and return if edit_template(RaServer, params[:db_view])
+    ca=CaDomain.find_by_name("Rails PKI Webserver CA")
+    @ca_items=ca.ca_items || []
   end
-
-  def ca_domain_list
-    if params[:id]!=nil
-      @ca_domain=CaDomain.find(params[:id])
-      if @ca_domain==nil
-        redirect_to :action => 'ca_domain_list', :id => nil
-        return
-      end
-      render(:template=>"ca/ca_domain_list_item")
-    else
-      @ca_domains=CaDomain.find_all
-    end
+ 
+  def delete_ra_server
+      redirect_to(:action=>"view_ra_server", :id=>nil) if delete_template(RaServer)
   end
-
-
-# --<RA Sync>--
-
-  def request_get
-    @log=[]
-    RaServer.find_all.each do |rs|
-      if rs.name=="-local-"
-        RaItem.find(:all, :conditions=>["state like ? or state like ?", RaItem::STATE_READY_TO_SIGN, RaItem::STATE_SIGN_APPROVED]).each do |ri|
-          if CaItem.create_from_ra_item(rs.id, ri)!=nil
-            @log<<"#{rs.name}: #{ri.dn} added"
-            ri.state=RaItem::STATE_IN_SIGNING
-            ri.save
-          end   
+    
+  def view_auth_method
+    render(:template=>"ca/view_auth_methods") if view_template(AuthMethod)
+  end
+   
+  def edit_auth_method
+    if !params[:db_view].nil? and params[:db_view]["type"].class==String
+      params[:db_view]["meth"]={}
+      params[:db_view]["meth"][:type]=params[:db_view]["type"]
+      params[:db_view].delete("type")
+      s=params[:db_view]["check"].gsub(/\r/,'')
+      a=s.split(/\n/)
+      params[:db_view]["meth"][:check]={}
+      a.each do |line|
+        if line=~/^([a-z_]+): (.+)$/
+          params[:db_view]["meth"][:check][$1]=$2
         end
-      end     
-    end
-    #o=ActionWebService::Client::Soap.new(BackendApi, "http://localhost:3001/backend/api")
-    #p o.find_request_by_id(2)
-  end
-  
-  def request_put
-    @log=[]
-    RaServer.find_all.each do |rs|
-      if rs.name=="-local-"
-        CaItem.find(:all, :conditions=>["state like ? and ra_server_id=?", CaItem::STATE_SIGNED, rs.id]).each do |ci|     
-          if RaItem.update_ra_item(ci)!=nil
-            @log<<"#{rs.name}: #{ci.dn} updated"
-            ci.state=CaItem::STATE_RA_SYNCED
-            ci.save
-          end   
-        end
-      end     
-    end
-  end
-  
-  def sync_db
-    @log=[]
-    RaServer.find_all.each do |rs|
-      next if rs.name=="-local-"
-      #-Sync Users
-    end
-  end
-
-# --<Sign>--
-
-  def sign_approved
-    @ca_items=CaItem.find_all_by_state(CaItem::STATE_SIGN_APPROVED)
-    if request.post?
-      @ca_items.each do |item|
-        item.sign_and_save
       end
-      redirect_to :action => 'cert_view'
+      params[:db_view].delete("check")
     end
+    redirect_to(:action=>"view_auth_method", :id=>@db_view.id) and return if edit_template(AuthMethod, params[:db_view])
+  end
+ 
+  def delete_auth_method
+      redirect_to(:action=>"view_auth_method", :id=>nil) if delete_template(AuthMethod)
   end
 
-# --<CA>--
-
-  def cert_view
-    if params[:id]!=nil then
-      @ca_item=CaItem.find(params[:id])
-      if @ca_item==nil
-        redirect_to :action => 'cert_view', :id => nil
-        return
+  def view_user
+    render(:template=>"ca/view_users") if view_template(User)
+  end
+   
+  def edit_user
+    if !params[:db_view].nil? and params[:db_view][:roles].class==Array
+      roles=[]
+      params[:db_view][:roles].each do |role|
+        roles<<Role.find_by_id(role)
       end
-      render(:template=>"ca/cert_view_item.rhtml")
-    else
-      @ca_items=CaItem.find_all
+      params[:db_view][:roles]=roles
+    end
+    @roles=Role.find(:all)
+    redirect_to(:action=>"view_user", :id=>@db_view.id) and return if edit_template(User, params[:db_view])
+  end
+ 
+  def delete_user
+      redirect_to(:action=>"view_user", :id=>nil) if delete_template(User)
+  end
+
+  def view_role
+    render(:template=>"ca/view_roles") if view_template(Role)
+  end
+   
+  def edit_role
+    if !params[:db_view].nil? and params[:db_view][:auth_methods].class==Array
+      ams=[]
+      params[:db_view][:auth_methods].each do |am|
+        ams<<AuthMethod.find_by_id(am)
+      end
+      params[:db_view][:auth_methods]=ams
+    end
+    redirect_to(:action=>"view_role", :id=>@db_view.id) and return if edit_template(Role, params[:db_view])
+    @ca_domains=CaDomain.find(:all)
+    @ra_servers=RaServer.find(:all)
+    @auth_methods=AuthMethod.find(:all)
+  end
+ 
+  def delete_role
+      redirect_to(:action=>"view_role", :id=>nil) if delete_template(Role)
+  end
+    
+  def view_ca_domain
+    render(:template=>"ca/view_ca_domains") if view_template(CaDomain)
+  end
+
+  def edit_ca_domain
+    if request.post? and (params[:db_view]["yaml"].class==StringIO or params[:db_view]["yaml"].class==Tempfile)
+      yaml_a=params[:db_view]["yaml"].to_a
+      params[:db_view]["yaml"]=yaml_a.to_s
+    end
+    redirect_to(:action=>"view_ca_domain", :id=>@db_view.id) and return if edit_template(CaDomain, params[:db_view])
+    if @db_view.dn.nil?
+      @ca_domains=CaDomain.find(:all)
+      render(:template=>"ca/add_ca_domain")
     end
   end
 
-# --<Others>--
+  def delete_ca_domain
+      redirect_to(:action=>"view_ca_domain", :id=>nil) if delete_template(CaDomain)
+  end
 
   def index
-    
   end
 
-
-
 end
-
-#=EOF

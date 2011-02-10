@@ -1,0 +1,6 @@
+<h2>View PEM <%= @ra_item.dn["CN"] %></h2>
+<p>
+<pre><%= OpenSSL::X509::Certificate.new(@ra_item.crt_pem).to_text %></pre>
+<br/>
+<%= link_to("Back", :action => "cert_view", :id => @ra_item.id, :type => nil) %>
+</p>

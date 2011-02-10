@@ -1,0 +1,6 @@
+<h2>View PEM <%= @ra_item.dn["CN"] %></h2>
+<p>
+<pre><%= @ra_item.crt_pem %></pre>
+<br/>
+<%= link_to("Back", :action => "cert_view", :id => @ra_item.id, :type => nil) %>
+</p>

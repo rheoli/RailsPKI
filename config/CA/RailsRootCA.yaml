@@ -1,6 +1,7 @@
 #=CA Definitions
 
 name: Rails Root CA
+duration: 20
 bits: 2048
 dn:
  C: CH

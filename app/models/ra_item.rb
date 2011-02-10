@@ -52,8 +52,9 @@ class RaItem < ActiveRecord::Base
     return(ra_item)
   end
 
-  def approve_for_sign
+  def approve_for_sign(_duration=365)
     self.state=STATE_SIGN_APPROVED
+    self.duration=_duration
     self.save
   end
 

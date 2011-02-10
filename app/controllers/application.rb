@@ -32,6 +32,23 @@ class ApplicationController < ActionController::Base
   def current_role
     @current_role ||= session[:role] ? Role.find_by_id(session[:role]) : nil
   end
+
+  def current_ra_item
+    return if current_role.ca_domain_id<1
+    cond_s="ca_domain_id=?"
+    cond_a=["", current_role.ca_domain_id]
+    if current_role.name==Role::ROLE_RA_APPLICANT
+      cond_s<<"and user_id=?"
+      cond_a<<current_user.id
+    end
+    cond_a[0]=cond_s
+    RaItem.with_scope(
+      :find=>{:conditions=>cond_a},
+      :create=>{:user_id=>current_user.id, :ca_domain_id=>current_role.ca_domain_id}
+           ) do
+      yield
+    end
+  end
   
  private
  

@@ -1,0 +1,29 @@
+<h2>Edit CA '<%= @db_view.name %>'</h2>
+
+<%= error_messages_for("db_view") %>
+
+<%= start_form_tag :action => 'edit_ca_domain', :id => @db_view.id %>
+<table border="1">
+	<% if @db_view.pubkey != nil -%>
+	<tr>
+		<td valign="top">Subject DN</td>
+		<td><%= @db_view.pubkey.subject.to_s  %></td>
+	</tr>
+	<tr>
+		<td valign="top">Issuer DN</td>
+		<td><%= @db_view.pubkey.issuer.to_s  %></td>
+	</tr>
+	<% end -%>
+	<tr>
+		<td valign="top">different private key (PEM)</td>
+		<td><%= text_area("db_view", "privkey_pem", "cols" => "70", "rows" => "20")%></td>
+	</tr>
+	<tr>
+		<td valign="top">different public key (PEM)</td>
+		<td><%= text_area("db_view", "pubkey_pem", "cols" => "70", "rows" => "20")%></td>
+	</tr>
+</table>
+<p>
+<%= submit_tag "Change" %></p>
+<%= end_form_tag %>
+</p>

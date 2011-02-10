@@ -1,0 +1,6 @@
+<h2>View Text <%= @ca_domain.name %></h2>
+<p>
+<pre><%= @ca_domain.pubkey.to_text %></pre>
+<br/>
+<%= link_to("Back", :action => "ca_view", :id => @ca_domain.id, :type => nil) %>
+</p>

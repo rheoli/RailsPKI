@@ -52,8 +52,10 @@ class UserRoleSchema < ActiveRecord::Migration
     end
     
     create_table "auth_methods", :force => true do |t|
-      t.column :name,               :string, :limit => 20, :null => false
+      t.column :name,               :string, :limit => 80, :null => false
       t.column :meth,               :text
+      t.column :created_on,         :datetime
+      t.column :updated_on,         :datetime
     end
     
   end

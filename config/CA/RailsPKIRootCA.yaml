@@ -1,6 +1,7 @@
 #=CA Definitions
 
 name: Rails PKI Root CA
+duration: 3
 bits: 2048
 dn:
  C: CH

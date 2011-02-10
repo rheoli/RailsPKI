@@ -1,0 +1,15 @@
+<h2>View RA Server '<%= @db_view.name %>'</h2>
+
+<table border="0">
+	<tr>
+		<td valign="top">Name</td>
+		<td><%= @db_view.name %></td>
+	</tr>
+	<tr>
+		<td valign="top">Certificate</td>
+		<td><%= (@db_view.ca_item.dn["CN"] if @db_view.ca_item_id>0) or "Local" %></td>
+	</tr>
+</table>
+</p>
+
+

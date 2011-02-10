@@ -1,0 +1,37 @@
+<h2>View AuthMethod '<%= @db_view.name %>'</h2>
+
+<table border="1">
+ <tr>
+  <td valign="top">Name</td>
+  <td>
+   <%= @db_view.name %>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">Method</td>
+  <td>
+   <ul>
+    <li>Type: <%= @db_view.meth[:type] %></li>
+    <li>Check:
+     <ul>
+      <% @db_view.meth[:check].each do |key, val| -%>
+       <li><%= key %>: <%= val %></li>
+      <% end -%>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <td valign="top">Roles</td>
+  <td>
+   <ul>
+   <% @db_view.roles.each do |role| -%>
+    <li><%= role.to_name %></li>
+   <% end -%>
+   </ul>
+  </td>
+ </tr>
+</table>
+<br/>
+</p>

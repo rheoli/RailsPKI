@@ -22,13 +22,7 @@
 #++
 
 class CaSchema < ActiveRecord::Migration
-  def self.up
-    create_table "pki_instances", :force => true do |t|
-      t.column :name,               :string, :limit => 200
-      t.column :instance,           :integer, :default => PKIInstance::RA_INSTANCE
-      t.column :ca_instance_ip,     :string, :limit => 50
-    end
-    
+  def self.up    
     create_table "ca_domains", :force => true do |t|
       t.column :name,               :string, :limit => 200
       t.column :yaml,               :text
@@ -55,6 +49,7 @@ class CaSchema < ActiveRecord::Migration
       t.column :state,              :string, :limit => 30, :default => 'none'
       t.column :user_id,            :integer, :default => 0, :null => false
       t.column :signer_user_id,     :integer, :default => 0, :null => false
+      t.column :duration,           :integer, :default => 365
       t.column :purpose,            :text
       t.column :ca_domain_id,       :integer, :null => false
       t.column :ra_server_id,       :integer, :null => false
@@ -71,7 +66,8 @@ class CaSchema < ActiveRecord::Migration
 
     create_table "ra_servers", :force => true do |t|
       t.column :name,               :string, :limit => 200
-      t.column :ca_item_id,         :interger, :null => false
+      t.column :ca_item_id,         :integer, :null => false
+      t.column :disabled,           :boolean, :default=>true
       t.column :created_on,         :datetime
       t.column :updated_on,         :datetime
     end
@@ -79,6 +75,7 @@ class CaSchema < ActiveRecord::Migration
 
     create_table "ca_revokes", :force => true do |t|
       t.column :ca_item_id,         :integer
+      t.column :user_id,            :integer, :default => 0, :null => false
       t.column :reason,             :string, :limit => 30, :default => ''
       t.column :created_on,         :datetime
       t.column :updated_on,         :datetime

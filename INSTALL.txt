@@ -1,9 +1,9 @@
 ========================
- RailsPKI Version Trunk
+ RailsPKI Version 0.0.3
 ========================
  
 Requiremens:
- - Ruby 1.8.4 (with OpenSSL Extension)
+ - Ruby 1.8.5 (with OpenSSL Extension)
  - SQLite >= 3.2.8 (only tested with 3.3.5)
  - sqlite3-ruby 1.1.0
  - Ruby on Rails >= 1.1.6 (only tested with 1.1.6)
@@ -11,22 +11,45 @@ Requiremens:
 Installation (of a CA instance):
  - Unpack Package somewhere
  - change directory to somewhere/RailsPKI
- - call 'rake migrate'
- - call 'rake railspki:init_ca'
- - call 'rake railspki:create_ca_server_cert'
- - call 'rake railspki:create_ca_user'
+ - create file config/railspki_site.rb with content (for example):
+    module RailsPKI                                                                      
+      LocalConfig = {
+        :type             => 'CA',
+        :name             => 'RailsPKI CA',
+      }
+    end
+ - call 'rake db:migrate'
+ - call 'rake railspki:ca:init'
+ - call 'rake railspki:ca:create_server_cert'
+ - call 'rake railspki:ca:create_user'
  - call 'script/server webrick-ssl'  -> password 'test'
  - load the client cert from config/ssl/user/{username}.p12 in your browser
    trust the new root certificate in the browser
  - now you can call RailsPKI on https://localhost:3443/ca
- - chose the role
+ - choose the role
  
 Installation (of a RA instance):
  - make sure there is already a CA instance installed
  - Unpack Package somewhere2
  - change directory to somewhere2/RailsPKI
- - call 'rake migrate'
- - call 'rake railspki:init_ra'
- - ???
- - now you can call RailsPKI on https://localhost:3443/ra
- - chose the role
+ - create file config/railspki_site.rb with content (for example):
+    module RailsPKI                                                                      
+      LocalConfig = {
+        :type             => 'RA',
+        :name             => 'RailsPKI RA',
+        :ca_ip            => '10.10.10.10',
+      }
+    end
+ - call 'rake db:migrate'
+ - call 'rake railspki:ra:init'
+ - call https://localhost:3443/ca -> request certificate and put the
+   config/ssl/server.req in the editbox
+ - approve it
+ - rake railspki:ca:sign:req:get # get the new approved request
+ - rake railspki:ca:sign # sign the request
+ - call https://localhost:3443/ca -> view certificates to get the PEM and
+   put it under config/ssl/server.crt on the RA
+ - call 'script/server webrick-ssl-ra'
+ - now you can call RailsPKI on https://localhost:4443/ra
+ - choose the role
+

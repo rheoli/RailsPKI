@@ -33,6 +33,7 @@ class RaSchema < ActiveRecord::Migration
       t.column :state,              :string, :limit => 30, :default => 'none'
       t.column :user_id,            :integer, :default => 0, :null => false
       t.column :signer_user_id,     :integer, :default => 0, :null => false
+      t.column :duration,           :integer, :default => 365
       t.column :purpose,            :text
       t.column :ca_domain_id,       :integer, :null => false
       t.column :supersede_item_id,  :integer
@@ -42,6 +43,7 @@ class RaSchema < ActiveRecord::Migration
 
     create_table "ra_revokes", :force => true do |t|
       t.column :ra_item_id,         :integer
+      t.column :user_id,            :integer, :default => 0, :null => false
       t.column :reason,             :string, :limit => 30, :default => ''
       t.column :created_on,         :datetime
       t.column :updated_on,         :datetime

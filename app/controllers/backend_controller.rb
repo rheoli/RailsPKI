@@ -33,4 +33,71 @@ class BackendController < ApplicationController
   def find_request_by_id(_id)
     RaItem.find(_id)
   end
+
+  def find_to_sign
+    RaItem.find(:all, :conditions=>["state like ?", RaItem::STATE_SIGN_APPROVED])
+  end
+
+  def update_ra_item(_ca_item)
+    return(false) if RaItem.update_ra_item(_ca_item).nil?
+    true
+  end
+
+  def find_update(_type)
+    res=[]
+    type_c=nil
+    type_c=User if _type=="User"
+    type_c=Role if _type=="Role"
+    type_c=AuthMethod if _type=="AuthMethod"
+    return(res) if type_c.nil?
+    type_c.find(:all).each do |entry|
+      res<<UpdateResult.new(:id=>entry.id, :updated_on=>entry.updated_on)
+    end
+    return(res)
+  end
+
+  def update_entries(_type, _entries)
+    type_c=nil
+    type_c=User if _type=="User"
+    type_c=Role if _type=="Role"
+    type_c=CaDomain if _type=="CaDomain"
+    type_c=AuthMethod if _type=="AuthMethod"
+    return(res) if type_c.nil?
+    _entries.each do |entry_s|
+      entry=YAML.load(entry_s)
+      u=type_c.find_by_id(entry["id"]) || type_c.new
+      u.attributes=entry
+      u.id=entry["id"]
+      u.save
+    end
+    return(true)
+  end
+
+  def delete_entries(_type, _entries)
+    type_c=nil
+    type_c=User if _type=="User"
+    type_c=Role if _type=="Role"
+    type_c=CaDomain if _type=="CaDomain"
+    type_c=AuthMethod if _type=="AuthMethod"
+    return(res) if type_c.nil?
+    _entries.each do |id|
+      entry=type_c.find_by_id(id)
+      entry.destroy if !entry.nil?
+    end
+    return(true)
+  end
+
+  def role_links(_id, _u_entries, _a_entries)
+    role=Role.find_by_id(_id)
+    return(false) if role.nil?
+    role.users=[]
+    _u_entries.each do |id|
+      role.users<<User.find_by_id(id)
+    end
+    role.auth_methods=[]
+    _a_entries.each do |id|
+      role.auth_methods<<AuthMethod.find_by_id(id)
+    end
+    role.save
+  end
 end

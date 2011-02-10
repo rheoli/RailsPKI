@@ -14,6 +14,8 @@ server = case ARGV.first
     ARGV.shift
   when "webrick-ssl"
     ARGV.shift
+  when "webrick-ssl-ra"
+    ARGV.shift
   else
     if RUBY_PLATFORM !~ /mswin/ && !silence_stderr { `lighttpd -version` }.blank? && defined?(FCGI)
       "lighttpd"
