@@ -1,0 +1,4 @@
+application/x-x509-ca-cert cacert
+application/x-x509-email-cert ecert email
+application/x-x509-server-cert scert servercert
+application/x-x509-user-cert ucert usercert

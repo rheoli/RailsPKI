@@ -1,0 +1,15 @@
+
+                                        dc=rheoli,dc=net
+                                               +
+                           +-------------------+----------
+                           |
+                   cn=RailsPKI Root CA
+                           |
+                  +--------+------------+
+                  |                     |
+        cn=RailsPKI Webserver CA  cn=RailsPKI ClientCert CA
+
+
+ou=RailsPKI
+o=Rails
+c=CH
