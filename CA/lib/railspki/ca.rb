@@ -24,7 +24,7 @@
 require 'openssl'
 require 'yaml'
 
-module RheoliPKI
+module RailsPKI
 
   class CA
     
@@ -163,7 +163,7 @@ p r
       File.open("#{@base}/var/#{@ca["name"]}/ca.yml","w") do |f|
         f.write @ca.to_yaml
       end
-      sign_ca=RheoliPKI::CA.new(@base)
+      sign_ca=RailsPKI::CA.new(@base)
       crt=nil
       if @ca["parent"]=="self"
         sign_ca.load(@ca["name"])
