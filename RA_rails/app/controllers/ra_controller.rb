@@ -1,0 +1,2 @@
+class RaController < ApplicationController
+end

@@ -1,0 +1,153 @@
+#--
+# Copyright (c) 2005-11 Stephan Toggweiler
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#++
+
+RHEOLIPKI_ROOT = "#{File.dirname(__FILE__)}" unless defined?(RHEOLIPKI_ROOT)
+
+$: << RHEOLIPKI_ROOT+"/lib"
+
+require 'yaml'
+require 'rheolipki/ca'
+
+
+namespace :rheolipki do
+  
+  namespace :request do
+    desc "RheoliPKI_CA: create new request"
+    task :create, :ca, :req do |cmd, args|
+      print "Create request:\n"
+      req_yml="#{RHEOLIPKI_ROOT}/var/#{args.ca}/00_local/#{args.req}.yml"
+      unless File.exists?(req_yml)
+        print " -> ERROR: yml not exists\n"
+        exit(1)
+      end
+      ca=RheoliPKI::CA.new(RHEOLIPKI_ROOT)
+      ca.load(args.ca)
+      req=YAML::load(File.open(req_yml))
+      new_key=OpenSSL::PKey::RSA.new(req["bits"])
+      req["key"]=new_key.to_pem
+      new_req=ca.gen_request(new_key, req["dn"])
+      req["req"]=new_req.to_pem
+      File.open(req_yml, "w") do |f|
+        f.write req.to_yaml
+      end
+      print new_req.to_s+"\n"
+    end
+  end
+  
+  namespace :ca do
+    desc "RheoliPKI_CA: create new ca"
+    task :create, :yaml do |cmd, args|
+      ca=RheoliPKI::CA.new(RHEOLIPKI_ROOT)
+      ca.create(args.yaml)
+    end
+
+    desc "RheoliPKI_CA: list ca's"
+    task :list do |cmd, args|
+      print "CA's of this PKI:\n"
+      Dir.open("#{RHEOLIPKI_ROOT}/var").each do |d|
+        next if d=="." or d==".."
+        print " - #{d}\n"
+      end
+    end
+    
+    desc "RheoliPKI_CA: find expiring certificates"
+    task :expiry do |cmd, args|
+      print "Search for expiring Certs:\n"
+      time_now=Time.now.gmtime
+      Dir.open("#{RHEOLIPKI_ROOT}/var").each do |d|
+        next if d=="." or d==".."
+        next unless File.directory?("#{RHEOLIPKI_ROOT}/var/#{d}/03_signed")
+        Dir.open("#{RHEOLIPKI_ROOT}/var/#{d}/03_signed").each do |y|
+          if y=~/^([a-zA-Z0-9]+\.yml)$/
+            info=YAML::load(File.open("#{RHEOLIPKI_ROOT}/var/#{d}/03_signed/#{y}"))
+            next if info["crt"].nil?
+            crt=OpenSSL::X509::Certificate.new(info["crt"])
+            days_left=(crt.not_after-time_now)/86400
+            if days_left < 30
+              print "Expiring (#{days_left}) #{d} => #{y}\n"
+            end
+          end
+        end
+      end
+    end
+    
+    desc "RheoliPKI_CA: generate crl"
+    task :crl, :ca do |cmd, args|
+      print "CRL of CA:\n"
+      ca=RheoliPKI::CA.new(RHEOLIPKI_ROOT)
+      ca.load(args.ca)
+      ca.gen_crl
+    end
+    
+    desc "RheoliPKI_CA: info of ca"
+    task :info, :ca do |cmd, args|
+      print "Info for CA #{args.ca}:\n"
+      if File.exists?("#{RHEOLIPKI_ROOT}/var/#{args.ca}/ca.yml")
+        ca_yml=YAML::load(File.open("#{RHEOLIPKI_ROOT}/var/#{args.ca}/ca.yml"))
+        unless ca_yml["crt"].nil?
+          x=OpenSSL::X509::Certificate.new(ca_yml["crt"])
+          print "#{x.to_text}\n"
+        else
+          print " -> ERROR: no cert in CA\n"
+        end
+      else
+        print " -> ERROR: no such CA\n"
+      end
+    end
+        
+    desc "RheoliPKI_CA: Sign request"
+    task :sign, :ca, :req do |cmd, args|
+      print "Sign request:\n"
+      ca=RheoliPKI::CA.new(RHEOLIPKI_ROOT)
+      ca.load(args.ca)
+      crt=ca.sign(args.req)
+      print crt.to_s+"\n"
+    end
+  
+    desc "RheoliPKI_CA: create PKCS12"
+    task :pkcs12, :ca, :crtid, :pwd do |cmd, args|
+      print "Create PKCS12:\n"
+      unless File.exists?("#{RHEOLIPKI_ROOT}/var/#{args.ca}/03_signed/#{args.crtid}.yml")
+        print " -> yml not found\n"
+        exit(1)
+      end
+      info=YAML::load(File.open("#{RHEOLIPKI_ROOT}/var/#{args.ca}/03_signed/#{args.crtid}.yml"))
+      ca=[]
+      parent=info["parent"]
+      while parent!="self"
+        ca_yml=YAML::load(File.open("#{RHEOLIPKI_ROOT}/var/#{parent}/ca.yml"))
+        ca<<OpenSSL::X509::Certificate.new(ca_yml["crt"])
+        parent=ca_yml["parent"]
+      end
+      crt=OpenSSL::X509::Certificate.new(info["crt"])
+      key=OpenSSL::PKey::RSA.new(info["key"])
+      name=info["dn"]["CN"]
+      pkcs12=OpenSSL::PKCS12.create(args.pwd,name,key,crt, ca)
+      File.open("#{name.gsub(/ /,'_')}.p12", "w") do |f|
+        f.write(pkcs12.to_der)
+      end
+    end
+  end
+end
+
+#=EOF

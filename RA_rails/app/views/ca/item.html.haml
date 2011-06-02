@@ -1,0 +1,13 @@
+%h1= "CA #{params[:id]}"
+
+Info for CA:
+%br/
+- if File.exists?("#{Rails.root}/var/#{params[:id]}/ca.yml")
+  - ca_yml=YAML::load(File.open("#{Rails.root}/var/#{params[:id]}/ca.yml"))
+  - unless ca_yml["crt"].nil?
+    - x=OpenSSL::X509::Certificate.new(ca_yml["crt"])
+    %pre= "#{x.to_text}\n"
+  - else
+    = "ERROR: no cert in CA"
+- else
+  = "ERROR: no such CA"

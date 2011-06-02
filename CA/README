@@ -1,0 +1,13 @@
+==============
+ RheoliPKI_CA
+==============
+
+Rake commands:
+ rake rheolipki:ca:create[yaml]       # RheoliPKI_CA: create new ca
+ rake rheolipki:ca:crl[ca]            # RheoliPKI_CA: generate crl
+ rake rheolipki:ca:info[ca]           # RheoliPKI_CA: info of ca
+ rake rheolipki:ca:list               # RheoliPKI_CA: list ca's
+ rake rheolipki:ca:sign[req]          # RheoliPKI_CA: Sign request
+ rake rheolipki:request:create[name]  # RheoliPKI_CA: create new request
+
+

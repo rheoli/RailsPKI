@@ -1,0 +1,30 @@
+name: rheoli_root_ca
+parent: self
+bits: 2048
+duration: 10
+crl_duration: 365
+primary: CN
+dn:
+  C: CH
+  ST: Zurich
+  L: Zurich
+  O: Rheoli
+  OU: PKI
+  CN: Rheoli Root CA
+  emailAddress: pki@rheoli.net
+self_sign:
+  critical:
+    - basicConstraints
+  basicConstraints:
+    - "CA:true"
+    - "pathlen:2"
+  keyUsage:
+    - "keyCertSign, cRLSign"
+  subjectKeyIdentifier:
+    - hash
+  authorityKeyIdentifier:
+    - "keyid:always"
+  issuerAltName:
+    - "issuer:copy"
+  subjectAltName:
+    - "email:copy"

@@ -1,0 +1,9 @@
+%h1 CA
+
+CA's of this PKI:
+%br/
+%ul
+  - Dir.open("#{Rails.root}/var").each do |d|
+    - next if d=="." or d==".."
+    %li
+      %a{:href=>"/ca/item/#{d}"}= d
