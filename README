@@ -1,0 +1,9 @@
+==========
+ RailsPKI
+==========
+
+CA/        CA Code
+Old/       Old RA/CA Rails Code
+RA_mail/   Mail RA
+RA_rails/  Rails RA
+RA_ws/     Webservice RA
