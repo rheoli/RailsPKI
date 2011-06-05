@@ -1,4 +1,6 @@
 RailsPKI::Application.routes.draw do
+  resources :users
+
   resources :certificates
 
   ActiveAdmin.routes(self)
