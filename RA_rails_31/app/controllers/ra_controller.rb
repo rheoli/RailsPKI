@@ -1,2 +1,0 @@
-class RaController < ApplicationController
-end
