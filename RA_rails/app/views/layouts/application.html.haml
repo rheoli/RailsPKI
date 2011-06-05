@@ -12,11 +12,11 @@
     %div#header
       %h1 Rheoli
       %h2 The RA Instance
-      %h3= "Logged in as: MyUser"
+      %h3= "Logged in as: #{current_user}"
     %div#navigation
       %ul
-        - if session[:user]
-          %li.selected= link_to("Home", :controller=>'certificate', :action=>'index')
+        - if user_signed_in?
+          %li.selected= link_to("Home", :controller=>'certificates', :action=>'index')
           %li &nbsp;
           %li= link_to("Logout", "/users/sign_out")
         - else
