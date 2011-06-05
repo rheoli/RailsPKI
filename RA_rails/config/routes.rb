@@ -9,6 +9,8 @@ RailsPKI::Application.routes.draw do
 
   devise_for :admin_users, ActiveAdmin::Devise.config
 
+  root :to => 'certificates#index'
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
