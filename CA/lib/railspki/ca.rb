@@ -90,12 +90,12 @@ p r
       else
         crt.issuer=@ca_crt.subject
       end
-      time_now=Time.at((Time.now.to_i/3600)*3600+3600).gmtime
+      time_now=Time.at((Time.now.to_i/3600)*3600).gmtime
       crt.not_before=time_now
       duration=1
       duration=req_info["duration"].to_i unless req_info["duration"].nil?
       duration=1 if duration < 1
-      crt.not_after=Time.gm(time_now.year+duration, time_now.month, time_now.day, time_now.hour)
+      crt.not_after=Time.gm(time_now.year+duration, time_now.month, time_now.day, time_now.hour+1)
       unless _reqname=="self"
         crt.not_after=@ca_crt.not_after if crt.not_after > @ca_crt.not_after
       end
