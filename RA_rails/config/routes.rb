@@ -1,16 +1,4 @@
 RailsPKI::Application.routes.draw do
-  resources :roles
-
-  devise_for :users
-
-  resources :users
-
-  resources :certificates
-
-  ActiveAdmin.routes(self)
-
-  devise_for :admin_users, ActiveAdmin::Devise.config
-
   root :to => 'certificates#index'
 
   # The priority is based upon order of creation:
