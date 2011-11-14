@@ -29,9 +29,32 @@ require 'yaml'
 require 'railspki/ca'
 
 
-namespace :rheolipki do
+namespace :railspki do
   
   namespace :request do
+    desc "RailsPKI_CA: import new request"
+    task :import, :ca, :req do |cmd, args|
+      print "Import request:\n"
+      if File.exists?("#{RAILSPKI_ROOT}/var/#{args.ca}/00_local/#{args.req}")
+        req=OpenSSL::X509::Request.new(File.open("#{RAILSPKI_ROOT}/var/#{args.ca}/00_local/#{args.req}").read)
+        cn=args.req
+        req.subject.to_a.each do |a|
+          cn=a[1] if a[0]=="CN"
+        end
+        tmpl=YAML::load(File.open("#{RAILSPKI_ROOT}/var/#{args.ca}/99_tmpl/req.yml").read)
+        tmpl["dn"]["CN"]=cn
+        tmpl["req"]=req.to_pem
+        tmpl["alternative"]=["DNS:to_replace"]
+        File.open("#{RAILSPKI_ROOT}/var/#{args.ca}/00_local/#{args.req.gsub(/\.req/,'')}.yml", "w") do |f|
+          f.puts tmpl.to_yaml
+        end
+        puts "Wrote to #{args.req.gsub(/\.req/,'')}.yml."
+      else
+        print " -> ERROR: request not exists\n"
+        exit(1)
+      end
+    end
+
     desc "RailsPKI_CA: create new request"
     task :create, :ca, :req do |cmd, args|
       print "Create request:\n"
@@ -98,7 +121,40 @@ namespace :rheolipki do
       ca.load(args.ca)
       ca.gen_crl
     end
-    
+
+    desc "RailsPKI_CA: find certificate"
+    task :find, :ca, :cert do |cmd, args|
+      print "Find certificate in CA #{args.ca}:\n"
+      if File.exists?("#{RAILSPKI_ROOT}/var/#{args.ca}/ca.yml")
+        res=`grep "#{args.cert}" #{RAILSPKI_ROOT}/var/#{args.ca}/03_signed/*.yml | awk '{ print " - " \$1 }' | sed 's/\.yml://g' | uniq`.gsub(/#{RAILSPKI_ROOT}\/var\/#{args.ca}\/03_signed\//, '')
+        puts res
+      else
+        print " -> ERROR: no such CA\n"
+      end
+    end
+
+    desc "RailsPKI_CA: print certificate (with chain)"
+    task :print, :ca, :cert_id do |cmd, args|
+      print "Print certificate in CA #{args.ca}:\n"
+      if File.exists?("#{RAILSPKI_ROOT}/var/#{args.ca}/ca.yml")
+        crt_yml=YAML::load(File.open("#{RAILSPKI_ROOT}/var/#{args.ca}/03_signed/#{args.cert_id}.yml"))
+        puts ""
+        puts "#{crt_yml["dn"]["CN"]}:"
+        puts crt_yml["crt"]
+        parent=crt_yml["parent"]
+        while !parent.nil? and parent!="self"
+          ca_yml=YAML::load(File.open("#{RAILSPKI_ROOT}/var/#{parent}/ca.yml"))
+          puts ""
+          puts "#{ca_yml["dn"]["CN"]}:"
+          puts ca_yml["crt"]
+          parent=ca_yml["parent"]
+        end
+      else
+        print " -> ERROR: no such CA\n"
+      end
+    end
+
+
     desc "RailsPKI_CA: info of ca"
     task :info, :ca do |cmd, args|
       print "Info for CA #{args.ca}:\n"
@@ -125,7 +181,7 @@ namespace :rheolipki do
     end
   
     desc "RailsPKI_CA: create PKCS12"
-    task :pkcs12, :ca, :crtid, :pwd do |cmd, args|
+    task :pkcs12, :ca, :crtid do |cmd, args|
       print "Create PKCS12:\n"
       unless File.exists?("#{RAILSPKI_ROOT}/var/#{args.ca}/03_signed/#{args.crtid}.yml")
         print " -> yml not found\n"
@@ -142,9 +198,16 @@ namespace :rheolipki do
       crt=OpenSSL::X509::Certificate.new(info["crt"])
       key=OpenSSL::PKey::RSA.new(info["key"])
       name=info["dn"]["CN"]
-      pkcs12=OpenSSL::PKCS12.create(args.pwd,name,key,crt, ca)
+      len=8
+      chars = ("a".."z").to_a + ("A".."Z").to_a + ("0".."9").to_a
+      newpass = ""
+      1.upto(len) { |i| newpass << chars[rand(chars.size-1)] }
+      pkcs12=OpenSSL::PKCS12.create(newpass,name,key,crt, ca)
       File.open("#{name.gsub(/ /,'_')}.p12", "w") do |f|
         f.write(pkcs12.to_der)
+      end
+      File.open("#{name.gsub(/ /,'_')}.p12.pwd", "w") do |f|
+        f.write(newpass)
       end
     end
   end
