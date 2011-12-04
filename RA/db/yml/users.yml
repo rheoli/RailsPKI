@@ -1,0 +1,9 @@
+admin:
+  password: adminx
+  roles:
+    ra_admin
+user:
+  password: testx
+  roles:
+    cert_admin:
+      - rheoli_webserver_ca
