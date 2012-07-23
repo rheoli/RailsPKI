@@ -192,6 +192,17 @@ p r
       crl.sign(@ca_key, OpenSSL::Digest::SHA1.new)
       time_now=Time.at((Time.now.to_i/60)*60+60).gmtime
       crl.last_update=time_now
+      Dir.open("#{@base}/var/#{@ca["name"]}/11_revoked").each do |file|
+        next unless file=~/^(.+)\.yml$/
+        serial=$1
+        revoked = OpenSSL::X509::Revoked.new
+        revoked.serial = serial.hex
+        revoked.time = File.mtime("#{@base}/var/#{@ca["name"]}/11_revoked/#{file}")
+        enum = OpenSSL::ASN1::Enumerated(4)
+        ext = OpenSSL::X509::Extension.new("CRLReason", enum)
+        revoked.add_extension(ext)
+        crl.add_revoked(revoked)
+      end
       duration=10
       duration=@ca["crl_duration"].to_i unless @ca["crl_duration"].nil?
       duration=1 if duration<1
