@@ -1,4 +1,4 @@
-RailsPKI::Application.routes.draw do
+RA::Application.routes.draw do
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

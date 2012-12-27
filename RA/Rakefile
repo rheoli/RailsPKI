@@ -4,4 +4,4 @@
 
 require File.expand_path('../config/application', __FILE__)
 
-RailsPKI::Application.load_tasks
+RA::Application.load_tasks
