@@ -88,8 +88,10 @@ namespace :railspki do
     task :list do |cmd, args|
       print "CA's of this PKI:\n"
       Dir.open("#{RAILSPKI_ROOT}/var").each do |d|
-        next if d=="." or d==".."
-        print " - #{d}\n"
+        if Dir.exists?("#{RAILSPKI_ROOT}/var/#{d}") and
+            File.exists?("#{RAILSPKI_ROOT}/var/#{d}/ca.yml")
+          print " - #{d}\n"
+        end
       end
     end
     
@@ -162,7 +164,30 @@ namespace :railspki do
         ca_yml=YAML::load(File.open("#{RAILSPKI_ROOT}/var/#{args.ca}/ca.yml"))
         unless ca_yml["crt"].nil?
           x=OpenSSL::X509::Certificate.new(ca_yml["crt"])
-          print "#{x.to_text}\n"
+          print "#{x.to_text}\n\n"
+          print "#{x.to_pem}\n"
+        else
+          print " -> ERROR: no cert in CA\n"
+        end
+      else
+        print " -> ERROR: no such CA\n"
+      end
+    end
+
+    desc "RailsPKI_CA: export ca key/cert"
+    task :export, :ca, :pwd do |cmd, args|
+      print "Export for CA #{args.ca}:\n"
+      if File.exists?("#{RAILSPKI_ROOT}/var/#{args.ca}/ca.yml")
+        ca_yml=YAML::load(File.open("#{RAILSPKI_ROOT}/var/#{args.ca}/ca.yml"))
+        unless ca_yml["key"].nil?
+          x=OpenSSL::PKey::RSA.new(ca_yml["key"])
+          print "#{x.to_pem(OpenSSL::Cipher::AES256.new(:CBC), args.pwd)}\n"
+        else
+          print " -> ERROR: no key in CA\n"
+        end
+        unless ca_yml["crt"].nil?
+          x=OpenSSL::X509::Certificate.new(ca_yml["crt"])
+          print "#{x.to_pem}\n"
         else
           print " -> ERROR: no cert in CA\n"
         end

@@ -148,8 +148,8 @@ p r
     end
     
     def create(_name)
-      raise "no ca file found" unless File.exists?(_name)
-      @ca=YAML.load(File.open(_name))
+      raise "no ca file found" unless File.exists?("#{@base}/tmpl/#{_name}")
+      @ca=YAML.load(File.open("#{@base}/tmpl/#{_name}"))
       raise "no name defined" if @ca["name"].nil?
       raise "ca already exists" if File.directory?("#{@base}/var/#{@ca["name"]}")
       pkey=OpenSSL::PKey::RSA.new(@ca["bits"])
@@ -189,7 +189,6 @@ p r
       crl=OpenSSL::X509::CRL.new
       crl.version=1
       crl.issuer=@ca_crt.subject
-      crl.sign(@ca_key, OpenSSL::Digest::SHA256.new)
       time_now=Time.at((Time.now.to_i/60)*60+60).gmtime
       crl.last_update=time_now
       Dir.open("#{@base}/var/#{@ca["name"]}/11_revoked").each do |file|
@@ -207,9 +206,12 @@ p r
       duration=@ca["crl_duration"].to_i unless @ca["crl_duration"].nil?
       duration=1 if duration<1
       crl.next_update=time_now+(duration*86400)
+      crl.sign(@ca_key, OpenSSL::Digest::SHA256.new)
       File.open("#{@base}/var/#{@ca["name"]}/#{@ca["name"]}.crl","w") do |f|
         f.write crl.to_der
       end
+      print "CRL as PEM:\n"
+      print "#{crl.to_pem}\n"
     end
     
     def gen_request(_key, _dn)
