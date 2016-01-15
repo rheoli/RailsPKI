@@ -1,0 +1,45 @@
+name: rheoli_client_ca
+parent: rheoli_root_ca
+bits: 2048
+duration: 5
+crl_duration: 20
+primary: CN
+dn:
+  C: CH
+  ST: Zurich
+  L: Zurich
+  O: Rheoli
+  OU: PKI
+  CN: Rheoli Client CA
+self_sign:
+  critical:
+    - basicConstraints
+  basicConstraints:
+    - "CA:true"
+    - "pathlen:0"
+  keyUsage:
+    - "keyCertSign, cRLSign"
+  subjectKeyIdentifier:
+    - hash
+  authorityKeyIdentifier:
+    - "keyid:always"
+  issuerAltName:
+    - "issuer:copy"
+  subjectAltName:
+    - "email:copy"
+sign:
+  critical: 
+    - basicConstraints
+  basicConstraints: 
+    - CA:false
+  extendedKeyUsage:
+    - clientAuth
+  issuerAltName:
+    - "issuer:copy"
+  subjectKeyIdentifier:
+    - hash
+  authorityKeyIdentifier:
+    - "keyid:always"
+  X509v3 CRL Distribution Points: 
+    - URI:http://crl.rheoli.net/client.crl
+
