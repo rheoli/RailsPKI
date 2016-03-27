@@ -160,7 +160,7 @@ p r
       req=gen_request(pkey, @ca["dn"])
       @ca["req"]=req.to_pem
       Dir.mkdir("#{@base}/var/#{@ca["name"]}")
-      %w{00_local 01_sec_check 02_to_sign 03_signed 10_expired 11_revoked}.each do |d|
+      %w{00_local 01_sec_check 02_to_sign 03_signed 10_expired 11_revoked 99_tmp}.each do |d|
         Dir.mkdir("#{@base}/var/#{@ca["name"]}/#{d}")
       end      
       File.open("#{@base}/var/#{@ca["name"]}/ca.yml","w") do |f|

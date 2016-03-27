@@ -236,11 +236,44 @@ namespace :railspki do
       newpass = ""
       1.upto(len) { |i| newpass << chars[rand(chars.size-1)] }
       pkcs12=OpenSSL::PKCS12.create(newpass,name,key,crt, ca)
-      File.open("#{name.gsub(/ /,'_')}.p12", "w") do |f|
+      File.open("#{RAILSPKI_ROOT}/var/#{info["parent"]}/99_tmp/#{name.gsub(/ /,'_')}.p12", "w") do |f|
         f.write(pkcs12.to_der)
       end
-      File.open("#{name.gsub(/ /,'_')}.p12.pwd", "w") do |f|
+      File.open("#{RAILSPKI_ROOT}/var/#{info["parent"]}/99_tmp/#{name.gsub(/ /,'_')}.p12.pwd", "w") do |f|
         f.write(newpass)
+      end
+    end
+
+    desc "RailsPKI_CA: export Key and Cert"
+    task :tofiles, :ca, :crtid do |cmd, args|
+      print "Create Files:\n"
+      unless File.exists?("#{RAILSPKI_ROOT}/var/#{args.ca}/03_signed/#{args.crtid}.yml")
+        print " -> yml not found\n"
+        exit(1)
+      end
+      info=YAML::load(File.open("#{RAILSPKI_ROOT}/var/#{args.ca}/03_signed/#{args.crtid}.yml"))
+      ca=[]
+      parent=info["parent"]
+      while parent!="self"
+        ca_yml=YAML::load(File.open("#{RAILSPKI_ROOT}/var/#{parent}/ca.yml"))
+        ca<<OpenSSL::X509::Certificate.new(ca_yml["crt"])
+        parent=ca_yml["parent"]
+      end
+      crt=OpenSSL::X509::Certificate.new(info["crt"])
+      key=OpenSSL::PKey::RSA.new(info["key"])
+      name=info["dn"]["CN"]
+      len=8
+      chars = ("a".."z").to_a + ("A".."Z").to_a + ("0".."9").to_a
+      newpass = ""
+      1.upto(len) { |i| newpass << chars[rand(chars.size-1)] }
+      File.open("#{RAILSPKI_ROOT}/var/#{info["parent"]}/99_tmp/#{name.gsub(/ /,'_')}.key", "w") do |f|
+        f.write(key.to_pem(OpenSSL::Cipher::AES256.new(:CBC), newpass))
+      end
+      File.open("#{RAILSPKI_ROOT}/var/#{info["parent"]}/99_tmp/#{name.gsub(/ /,'_')}.key.pwd", "w") do |f|
+        f.write(newpass)
+      end
+      File.open("#{RAILSPKI_ROOT}/var/#{info["parent"]}/99_tmp/#{name.gsub(/ /,'_')}.crt", "w") do |f|
+        f.write(crt.to_pem)
       end
     end
   end
